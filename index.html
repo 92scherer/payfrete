@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>PayFrete | O amigo do freteiro</title>
 
+  <!-- Configuração PWA (Android & iOS Safari) -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#00E65B" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="PayFrete" />
+  <link rel="apple-touch-icon" href="logo.png" />
+
   <!-- Tailwind CSS via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
 
@@ -294,6 +302,18 @@
     </div>
 
     <footer class="mt-8 text-center">
+      <!-- Banner de Instalação PWA (Android / Chrome) -->
+      <div id="pwaInstallBanner" class="hidden mb-3">
+        <button
+          type="button"
+          onclick="installPayFreteApp()"
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900 text-white text-xs font-extrabold shadow-md hover:bg-slate-800 transition-all"
+        >
+          <i data-lucide="smartphone" class="w-4 h-4 text-[#00E65B]"></i>
+          <span>Instalar App na Tela Inicial</span>
+        </button>
+      </div>
+
       <p class="text-[11px] text-slate-400 font-medium">
         PayFrete &bull; O amigo do freteiro
       </p>
@@ -874,7 +894,7 @@
 
 
   <!-- =====================================================================
-       LÓGICA COMPLETA: NUVEM GOOGLE DRIVE + FALLBACK OFFLINE + WHATSAPP PIX
+       LÓGICA COMPLETA: PWA + NUVEM GOOGLE DRIVE + OFFLINE + WHATSAPP PIX
        ===================================================================== -->
   <script>
     // =========================================================================
@@ -1229,7 +1249,6 @@
       btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Abrindo WhatsApp e Liberando...</span>`;
       lucide.createIcons();
 
-      // Monta a mensagem pronta com os dados da placa para o WhatsApp 51992743197
       const tipoPagamento = currentPixMode === 'activation'
         ? 'Ativação PayFrete (R$ 19,90)'
         : 'Renovação Mensal PayFrete (R$ 9,90)';
@@ -1243,10 +1262,8 @@
 
       const whatsappUrl = `https://wa.me/${ADMIN_WHATSAPP}?text=${encodeURIComponent(msgWhatsApp)}`;
 
-      // Abre o WhatsApp imediatamente no clique do usuário (evita bloqueio de pop-up)
       window.open(whatsappUrl, '_blank');
 
-      // Libera o sistema automaticamente na nuvem e localmente
       try {
         if (currentDriver.pendingRegistration) {
           await callCloud({
@@ -1980,6 +1997,35 @@
         toast.classList.add('hidden');
         toast.classList.remove('flex');
       }, 2600);
+    }
+
+    // =========================================================================
+    // REGISTRO DO SERVICE WORKER (PWA) + BANNER DE INSTALAÇÃO
+    // =========================================================================
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(() => console.log('PayFrete PWA ativo'))
+          .catch((err) => console.warn('Erro ao registrar SW:', err));
+      });
+    }
+
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const installBanner = document.getElementById('pwaInstallBanner');
+      if (installBanner) installBanner.classList.remove('hidden');
+    });
+
+    async function installPayFreteApp() {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        document.getElementById('pwaInstallBanner')?.classList.add('hidden');
+      }
+      deferredPrompt = null;
     }
   </script>
 </body>
