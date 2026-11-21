@@ -1,0 +1,25 @@
+{
+  "name": "PayFrete | O amigo do freteiro",
+  "short_name": "PayFrete",
+  "description": "Controle financeiro na nuvem para motoristas de frete e entregas.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FFFFFF",
+  "theme_color": "#00E65B",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
