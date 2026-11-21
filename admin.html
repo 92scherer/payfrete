@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>PayFrete Admin | Gestão de Motoristas</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          colors: { neon: '#00E65B', neonDark: '#00B848', neonSoft: '#E8FFF0' }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #FFFFFF;
+      color: #0F172A;
+      font-family: 'Inter', system-ui, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .tabular-nums { font-variant-numeric: tabular-nums; }
+    .neon-glow { box-shadow: 0 10px 25px -5px rgba(0, 230, 91, 0.35); }
+  </style>
+</head>
+<body class="bg-white text-slate-900 min-h-screen flex flex-col justify-between antialiased">
+
+  <!-- TELA DE BLOQUEIO ADMINISTRATIVO -->
+  <div id="adminLockScreen" class="min-h-screen flex flex-col items-center justify-center px-5 py-8">
+    <div class="w-full max-w-sm text-center">
+      <img
+        src="logo.png"
+        alt="PayFrete Logo"
+        class="h-28 w-auto object-contain mx-auto mb-4"
+        onerror="this.style.display='none'; document.getElementById('lockLogoFallback').classList.remove('hidden');"
+      />
+      <div id="lockLogoFallback" class="hidden mb-4 flex flex-col items-center">
+        <div class="w-16 h-16 rounded-2xl bg-[#00E65B] flex items-center justify-center text-slate-950 shadow-lg mb-2">
+          <i data-lucide="shield-check" class="w-8 h-8 stroke-[2.5]"></i>
+        </div>
+        <span class="text-2xl font-black text-slate-900">Pay<span class="text-[#00B848]">Frete</span> Admin</span>
+      </div>
+
+      <span class="inline-block px-3 py-1 rounded-full bg-slate-900 text-[#00E65B] text-[10px] font-black uppercase tracking-widest mb-4">
+        Painel do Administrador
+      </span>
+
+      <form onsubmit="unlockAdmin(event)" class="rounded-3xl bg-white border-2 border-slate-100 p-6 shadow-xl shadow-slate-200/60 space-y-4">
+        <div>
+          <h1 class="text-lg font-black text-slate-900">Acesso Restrito</h1>
+          <p class="text-xs text-slate-500">Digite a senha mestra para gerenciar placas</p>
+        </div>
+
+        <input
+          type="password"
+          id="adminPassInput"
+          inputmode="numeric"
+          required
+          placeholder="••••"
+          class="w-full bg-slate-50 border border-slate-200 focus:border-[#00C850] focus:bg-white rounded-2xl px-4 py-3.5 text-center text-xl font-black tracking-[0.4em] text-slate-900 outline-none"
+        />
+
+        <p id="lockError" class="hidden text-xs font-bold text-red-600">Senha incorreta.</p>
+
+        <button
+          type="submit"
+          class="w-full py-3.5 rounded-2xl bg-[#00E65B] hover:bg-[#00D453] active:scale-[0.98] text-slate-950 font-black text-sm neon-glow transition-all flex items-center justify-center gap-2"
+        >
+          <i data-lucide="unlock" class="w-4 h-4 stroke-[2.5]"></i>
+          <span>Entrar no Painel</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- DASHBOARD ADMINISTRATIVO PRINCIPAL -->
+  <div id="adminDashboard" class="hidden flex-col justify-between min-h-screen">
+    <main class="w-full max-w-4xl mx-auto px-4 sm:px-6 pt-5 pb-12 flex-1">
+
+      <header class="flex flex-col items-center text-center mb-6 relative">
+        <div class="w-full flex items-center justify-between mb-2">
+          <span class="px-3 py-1 rounded-full bg-slate-900 text-[#00E65B] text-[11px] font-black uppercase tracking-wider">
+            Admin PayFrete
+          </span>
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              onclick="loadDrivers(true)"
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 border border-slate-200 text-xs font-bold text-slate-700 transition-colors"
+            >
+              <i data-lucide="refresh-cw" id="adminRefreshIcon" class="w-3.5 h-3.5 text-[#009E3E]"></i>
+              <span>Atualizar</span>
+            </button>
+            <button
+              type="button"
+              onclick="lockAdmin()"
+              title="Bloquear Painel"
+              class="p-2 rounded-full bg-slate-100 hover:bg-red-50 text-slate-600 hover:text-red-600 border border-slate-200 transition-colors"
+            >
+              <i data-lucide="log-out" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+        <img
+          src="logo.png"
+          alt="PayFrete Logo"
+          class="h-24 sm:h-28 w-auto object-contain mx-auto"
+          onerror="this.style.display='none'"
+        />
+        <p class="text-xs font-bold text-slate-500 mt-1">Conferência de Pix, Liberação e Bloqueio de Placas</p>
+      </header>
+
+      <section class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+        <div class="rounded-2xl bg-slate-50 border border-slate-200 p-4">
+          <span class="text-[11px] font-bold text-slate-500 uppercase">Total Placas</span>
+          <p id="statTotal" class="text-2xl font-black text-slate-900 tabular-nums mt-1">0</p>
+        </div>
+
+        <div class="rounded-2xl bg-[#E8FFF0] border border-[#00E65B]/60 p-4">
+          <span class="text-[11px] font-bold text-[#008A36] uppercase">Ativas (30d)</span>
+          <p id="statActive" class="text-2xl font-black text-[#009E3E] tabular-nums mt-1">0</p>
+        </div>
+
+        <div class="rounded-2xl bg-amber-50 border border-amber-200 p-4">
+          <span class="text-[11px] font-bold text-amber-800 uppercase">Pendentes / Venc.</span>
+          <p id="statPending" class="text-2xl font-black text-amber-600 tabular-nums mt-1">0</p>
+        </div>
+
+        <div class="rounded-2xl bg-red-50 border border-red-200 p-4">
+          <span class="text-[11px] font-bold text-red-700 uppercase">Bloqueadas</span>
+          <p id="statBlocked" class="text-2xl font-black text-red-600 tabular-nums mt-1">0</p>
+        </div>
+      </section>
+
+      <section class="space-y-3 mb-5">
+        <div class="relative">
+          <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+            <i data-lucide="search" class="w-4 h-4"></i>
+          </span>
+          <input
+            type="text"
+            id="searchInput"
+            oninput="renderDriversList()"
+            placeholder="Buscar por placa (ex: ABC1D23), nome ou WhatsApp..."
+            class="w-full bg-slate-50 border border-slate-200 focus:border-[#00C850] focus:bg-white rounded-2xl pl-10 pr-4 py-3 text-sm font-semibold text-slate-900 placeholder-slate-400 outline-none"
+          />
+        </div>
+
+        <div class="grid grid-cols-4 gap-1.5 bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
+          <button type="button" onclick="setStatusFilter('all')" id="st-all" class="st-btn py-2 rounded-xl text-xs font-extrabold bg-[#00E65B] text-slate-950 shadow-sm">
+            Todas
+          </button>
+          <button type="button" onclick="setStatusFilter('active')" id="st-active" class="st-btn py-2 rounded-xl text-xs font-bold text-slate-600">
+            Ativas
+          </button>
+          <button type="button" onclick="setStatusFilter('pending')" id="st-pending" class="st-btn py-2 rounded-xl text-xs font-bold text-slate-600">
+            Pendentes
+          </button>
+          <button type="button" onclick="setStatusFilter('blocked')" id="st-blocked" class="st-btn py-2 rounded-xl text-xs font-bold text-slate-600">
+            Bloqueadas
+          </button>
+        </div>
+      </section>
+
+      <section>
+        <div id="loadingBox" class="py-12 text-center">
+          <i data-lucide="loader-2" class="w-8 h-8 text-[#00B848] animate-spin mx-auto mb-2"></i>
+          <p class="text-xs font-bold text-slate-500">Carregando cadastros da planilha...</p>
+        </div>
+
+        <div id="driversList" class="space-y-3"></div>
+
+        <div id="emptyDriversBox" class="hidden rounded-3xl bg-slate-50 border border-slate-200 p-8 text-center">
+          <p class="text-sm font-black text-slate-900">Nenhuma placa encontrada</p>
+          <p class="text-xs text-slate-500 mt-1">Tente limpar o filtro ou clique em Atualizar.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="py-5 border-t border-slate-100 text-center">
+      <p class="text-[11px] text-slate-400 font-medium">
+        PayFrete Admin &bull; O amigo do freteiro
+      </p>
+    </footer>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 hidden items-center gap-2 px-4 py-2.5 rounded-2xl bg-slate-900 text-xs font-bold text-white shadow-2xl whitespace-nowrap">
+    <span id="toastDot" class="w-2 h-2 rounded-full bg-[#00E65B]"></span>
+    <span id="toastMsg">Atualizado!</span>
+  </div>
+
+  <script>
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyUsrai0uYgPn12C8TymofeLhwz6QC_SYc2IhnliHqz6gssi2cir1BM_7NZyzmshr3J/exec";
+    const ADMIN_PIN = "1992";
+    const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+
+    let allDrivers = [];
+    let currentStatusFilter = 'all';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      if (sessionStorage.getItem('payfrete_admin_auth') === '1') {
+        showDashboard();
+      }
+    });
+
+    function unlockAdmin(e) {
+      e.preventDefault();
+      const val = document.getElementById('adminPassInput').value.trim();
+      if (val === ADMIN_PIN) {
+        sessionStorage.setItem('payfrete_admin_auth', '1');
+        document.getElementById('lockError').classList.add('hidden');
+        showDashboard();
+      } else {
+        document.getElementById('lockError').classList.remove('hidden');
+      }
+    }
+
+    function lockAdmin() {
+      sessionStorage.removeItem('payfrete_admin_auth');
+      document.getElementById('adminDashboard').classList.add('hidden');
+      document.getElementById('adminLockScreen').classList.remove('hidden');
+      document.getElementById('adminPassInput').value = '';
+    }
+
+    function showDashboard() {
+      document.getElementById('adminLockScreen').classList.add('hidden');
+      document.getElementById('adminDashboard').classList.remove('hidden');
+      document.getElementById('adminDashboard').classList.add('flex');
+      loadDrivers(false);
+    }
+
+    async function callCloud(payload) {
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+      return await res.json();
+    }
+
+    async function loadDrivers(manual = false) {
+      const icon = document.getElementById('adminRefreshIcon');
+      icon.classList.add('animate-spin');
+
+      try {
+        const res = await callCloud({ action: 'adminListDrivers', adminPin: ADMIN_PIN });
+        document.getElementById('loadingBox').classList.add('hidden');
+
+        if (!res.ok) {
+          showToast(res.error || 'Erro ao buscar motoristas.', 'error');
+          return;
+        }
+
+        allDrivers = res.drivers || [];
+        updateStats();
+        renderDriversList();
+        if (manual) showToast('Lista atualizada da planilha!', 'success');
+      } catch (err) {
+        document.getElementById('loadingBox').classList.add('hidden');
+        showToast('Erro de conexão com o Google Apps Script.', 'error');
+      } finally {
+        icon.classList.remove('animate-spin');
+      }
+    }
+
+    function classifyDriver(d) {
+      if (d.blocked === true || String(d.blocked).toUpperCase() === 'TRUE' || String(d.status).toLowerCase() === 'bloqueado') {
+        return 'blocked';
+      }
+      const lastPaid = Number(d.lastPaidAt || 0);
+      if (!lastPaid || (Date.now() - lastPaid) >= THIRTY_DAYS_MS) {
+        return 'pending';
+      }
+      return 'active';
+    }
+
+    function updateStats() {
+      let active = 0, pending = 0, blocked = 0;
+      allDrivers.forEach(d => {
+        const st = classifyDriver(d);
+        if (st === 'active') active++;
+        else if (st === 'pending') pending++;
+        else if (st === 'blocked') blocked++;
+      });
+
+      document.getElementById('statTotal').textContent = allDrivers.length;
+      document.getElementById('statActive').textContent = active;
+      document.getElementById('statPending').textContent = pending;
+      document.getElementById('statBlocked').textContent = blocked;
+    }
+
+    function setStatusFilter(filter) {
+      currentStatusFilter = filter;
+      document.querySelectorAll('.st-btn').forEach(btn => {
+        btn.classList.remove('bg-[#00E65B]', 'text-slate-950', 'font-extrabold', 'shadow-sm');
+        btn.classList.add('text-slate-600', 'font-bold');
+      });
+      const activeBtn = document.getElementById(`st-${filter}`);
+      activeBtn.classList.remove('text-slate-600', 'font-bold');
+      activeBtn.classList.add('bg-[#00E65B]', 'text-slate-950', 'font-extrabold', 'shadow-sm');
+      renderDriversList();
+    }
+
+    function renderDriversList() {
+      const query = document.getElementById('searchInput').value.trim().toLowerCase();
+      const listEl = document.getElementById('driversList');
+      const emptyEl = document.getElementById('emptyDriversBox');
+
+      const filtered = allDrivers.filter(d => {
+        const st = classifyDriver(d);
+        if (currentStatusFilter !== 'all' && st !== currentStatusFilter) return false;
+        if (!query) return true;
+
+        const plate = String(d.plate || '').toLowerCase();
+        const name = String(d.name || '').toLowerCase();
+        const phone = String(d.phone || '').toLowerCase();
+        return plate.includes(query) || name.includes(query) || phone.includes(query);
+      });
+
+      if (filtered.length === 0) {
+        listEl.innerHTML = '';
+        emptyEl.classList.remove('hidden');
+        return;
+      }
+
+      emptyEl.classList.add('hidden');
+      listEl.innerHTML = filtered.map(d => {
+        const st = classifyDriver(d);
+        const lastPaid = Number(d.lastPaidAt || 0);
+        const daysLeft = lastPaid ? Math.max(0, Math.ceil((THIRTY_DAYS_MS - (Date.now() - lastPaid)) / (24 * 60 * 60 * 1000))) : 0;
+        const paidDateStr = lastPaid ? new Date(lastPaid).toLocaleDateString('pt-BR') : 'Nunca pagou';
+
+        let badgeHTML = '';
+        if (st === 'blocked') {
+          badgeHTML = `<span class="px-2.5 py-1 rounded-full bg-red-100 text-red-700 text-[11px] font-black uppercase">Bloqueado</span>`;
+        } else if (st === 'active') {
+          badgeHTML = `<span class="px-2.5 py-1 rounded-full bg-[#E8FFF0] text-[#008A36] border border-[#00E65B]/50 text-[11px] font-black">${daysLeft}d restantes</span>`;
+        } else {
+          badgeHTML = `<span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 text-[11px] font-black">Pendente / Vencido</span>`;
+        }
+
+        const cleanPhone = String(d.phone || '').replace(/\D/g, '');
+        const waLink = cleanPhone
+          ? `https://wa.me/55${cleanPhone}?text=${encodeURIComponent(`Olá ${d.name}, aqui é do suporte PayFrete (placa ${d.plate}).`)}`
+          : '#';
+
+        return `
+          <div class="rounded-3xl bg-white border-2 ${st === 'blocked' ? 'border-red-200 bg-red-50/20' : 'border-slate-100'} p-4 sm:p-5 shadow-sm">
+            <div class="flex items-start justify-between gap-3 flex-wrap">
+              <div>
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="px-3 py-1 rounded-xl bg-slate-900 text-white text-sm font-black tracking-wider uppercase">
+                    ${escapeHTML(d.plate)}
+                  </span>
+                  ${badgeHTML}
+                </div>
+                <h3 class="text-base font-black text-slate-900 mt-2">${escapeHTML(d.name || 'Sem nome')}</h3>
+                <div class="flex items-center gap-3 text-xs text-slate-500 font-medium mt-1 flex-wrap">
+                  <span>📱 ${escapeHTML(d.phone || 'Sem telefone')}</span>
+                  <span>🔑 PIN: <strong class="text-slate-700">${escapeHTML(d.pin || '----')}</strong></span>
+                  <span>📅 Último Pix: <strong class="text-slate-700">${paidDateStr}</strong></span>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2 flex-wrap w-full sm:w-auto mt-2 sm:mt-0">
+                ${cleanPhone ? `
+                  <a
+                    href="${waLink}"
+                    target="_blank"
+                    class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-extrabold transition-colors"
+                  >
+                    <i data-lucide="message-circle" class="w-4 h-4 text-[#009E3E]"></i>
+                    <span>WhatsApp</span>
+                  </a>
+                ` : ''}
+
+                <button
+                  type="button"
+                  onclick="adminUpdateDriver('${d.plate}', 'activate30')"
+                  class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-[#00E65B] hover:bg-[#00D453] text-slate-950 text-xs font-black transition-colors"
+                >
+                  <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+                  <span>Liberar 30d</span>
+                </button>
+
+                ${st === 'blocked' ? `
+                  <button
+                    type="button"
+                    onclick="adminUpdateDriver('${d.plate}', 'unblock')"
+                    class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold transition-colors"
+                  >
+                    <i data-lucide="unlock" class="w-4 h-4 text-[#00E65B]"></i>
+                    <span>Desbloquear</span>
+                  </button>
+                ` : `
+                  <button
+                    type="button"
+                    onclick="adminUpdateDriver('${d.plate}', 'block')"
+                    class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-extrabold transition-colors"
+                  >
+                    <i data-lucide="ban" class="w-4 h-4"></i>
+                    <span>Bloquear</span>
+                  </button>
+                `}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    async function adminUpdateDriver(plate, command) {
+      showToast('Atualizando placa na planilha...', 'neutral');
+      try {
+        const res = await callCloud({
+          action: 'adminUpdateDriver',
+          adminPin: ADMIN_PIN,
+          plate,
+          command
+        });
+
+        if (res.ok) {
+          showToast(`Placa ${plate} atualizada com sucesso!`, 'success');
+          loadDrivers(false);
+        } else {
+          showToast(res.error || 'Erro ao atualizar placa.', 'error');
+        }
+      } catch (e) {
+        showToast('Falha de comunicação com o servidor.', 'error');
+      }
+    }
+
+    function escapeHTML(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    let toastTimer;
+    function showToast(msg, type = 'success') {
+      const el = document.getElementById('toast');
+      const dot = document.getElementById('toastDot');
+      document.getElementById('toastMsg').textContent = msg;
+      dot.className = 'w-2 h-2 rounded-full ' + (type === 'success' ? 'bg-[#00E65B]' : type === 'error' ? 'bg-red-500' : 'bg-slate-400');
+      el.classList.remove('hidden');
+      el.classList.add('flex');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { el.classList.add('hidden'); el.classList.remove('flex'); }, 2600);
+    }
+  </script>
+</body>
+</html>
