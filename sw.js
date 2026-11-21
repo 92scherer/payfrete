@@ -1,4 +1,4 @@
-const CACHE_NAME = 'payfrete-pwa-v1';
+const CACHE_NAME = 'payfrete-pwa-v2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
