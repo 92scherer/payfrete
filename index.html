@@ -8,7 +8,7 @@
   <!-- Tailwind CSS via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Fonte Inter (Google Fonts) -->
+  <!-- Fonte Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -27,8 +27,6 @@
             neon: '#00E65B',
             neonDark: '#00B848',
             neonSoft: '#E8FFF0',
-            surface: '#F8FAFC',
-            borderLight: '#E2E8F0',
           }
         }
       }
@@ -48,35 +46,17 @@
       font-variant-numeric: tabular-nums;
     }
 
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
-    }
-    .no-scrollbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
-
     @keyframes slideUp {
-      from {
-        transform: translateY(100%);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
+      from { transform: translateY(100%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
     }
     .animate-slide-up {
       animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
     @keyframes pulseNeon {
-      0%, 100% {
-        box-shadow: 0 0 0 0 rgba(0, 230, 91, 0.45);
-      }
-      50% {
-        box-shadow: 0 0 0 12px rgba(0, 230, 91, 0);
-      }
+      0%, 100% { box-shadow: 0 0 0 0 rgba(0, 230, 91, 0.45); }
+      50% { box-shadow: 0 0 0 12px rgba(0, 230, 91, 0); }
     }
     .neon-pulse {
       animation: pulseNeon 1.8s infinite;
@@ -94,7 +74,6 @@
        ===================================================================== -->
   <div id="splashScreen" class="fixed inset-0 z-50 bg-white flex flex-col items-center justify-center px-6 text-center transition-opacity duration-300">
     <div class="max-w-sm w-full flex flex-col items-center">
-      <!-- Logo Centralizado -->
       <div class="mb-6 flex items-center justify-center">
         <img
           src="logo.png"
@@ -102,7 +81,6 @@
           class="h-36 sm:h-44 w-auto object-contain mx-auto"
           onerror="this.style.display='none'; document.getElementById('splashLogoFallback').classList.remove('hidden');"
         />
-        <!-- Fallback caso logo.png ainda não esteja na pasta -->
         <div id="splashLogoFallback" class="hidden flex flex-col items-center">
           <div class="w-24 h-24 rounded-3xl bg-[#00E65B] flex items-center justify-center text-slate-950 shadow-xl neon-glow mb-4">
             <i data-lucide="truck" class="w-12 h-12 stroke-[2.5]"></i>
@@ -113,15 +91,13 @@
         </div>
       </div>
 
-      <!-- Frase Principal -->
       <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 leading-tight">
         PayFrete, <span class="text-[#00B848]">o amigo do freteiro</span>
       </h1>
       <p class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400 mt-3">
-        Controle Financeiro Inteligente
+        Controle Financeiro na Nuvem
       </p>
 
-      <!-- Barra de carregamento de 2 segundos -->
       <div class="w-48 h-1.5 bg-slate-100 rounded-full overflow-hidden mt-8 border border-slate-200">
         <div id="splashProgress" class="h-full bg-[#00E65B] transition-all duration-[2000ms] ease-linear w-0"></div>
       </div>
@@ -134,7 +110,6 @@
        ===================================================================== -->
   <div id="authScreen" class="hidden w-full max-w-md mx-auto px-5 py-8 min-h-screen flex-col justify-between">
     <div>
-      <!-- Topo Centralizado com Logo -->
       <header class="flex flex-col items-center justify-center text-center mt-2 mb-6">
         <img
           src="logo.png"
@@ -160,7 +135,7 @@
         </p>
       </header>
 
-      <!-- Seletor de Aba: Entrar / Primeiro Cadastro -->
+      <!-- Seletor de Aba -->
       <div class="grid grid-cols-2 gap-1.5 bg-slate-100 p-1.5 rounded-2xl border border-slate-200 mb-5">
         <button
           type="button"
@@ -188,11 +163,11 @@
           <span id="authErrorText">Verifique os dados informados.</span>
         </div>
 
-        <!-- FORMULÁRIO 1: LOGIN (PLACA + SENHA 4 DÍGITOS) -->
+        <!-- FORMULÁRIO 1: LOGIN -->
         <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
           <div>
             <h2 class="text-lg font-black text-slate-900">Acessar minha conta</h2>
-            <p class="text-xs text-slate-500">Entre com a placa do veículo e sua senha de 4 números</p>
+            <p class="text-xs text-slate-500">Seus dados ficam salvos na nuvem pela sua placa</p>
           </div>
 
           <div>
@@ -234,9 +209,10 @@
 
           <button
             type="submit"
+            id="loginBtn"
             class="w-full py-4 rounded-2xl bg-[#00E65B] hover:bg-[#00D453] active:scale-[0.98] text-slate-950 font-black text-sm neon-glow transition-all flex items-center justify-center gap-2 mt-2"
           >
-            <i data-lucide="log-in" class="w-4 h-4 stroke-[2.5]"></i>
+            <i data-lucide="cloud" class="w-4 h-4 stroke-[2.5]"></i>
             <span>Entrar no PayFrete</span>
           </button>
         </form>
@@ -245,7 +221,7 @@
         <form id="registerForm" onsubmit="handleRegister(event)" class="hidden space-y-3.5">
           <div>
             <h2 class="text-lg font-black text-slate-900">Cadastro do Motorista</h2>
-            <p class="text-xs text-slate-500">Preencha seus dados para liberar o acesso</p>
+            <p class="text-xs text-slate-500">Crie sua conta na nuvem para acessar de qualquer aparelho</p>
           </div>
 
           <div>
@@ -307,6 +283,7 @@
 
           <button
             type="submit"
+            id="registerBtn"
             class="w-full py-4 rounded-2xl bg-[#00E65B] hover:bg-[#00D453] active:scale-[0.98] text-slate-950 font-black text-sm neon-glow transition-all flex items-center justify-center gap-2 mt-1"
           >
             <span>Continuar para Ativação Pix</span>
@@ -329,7 +306,6 @@
        ===================================================================== -->
   <div id="pixScreen" class="hidden w-full max-w-md mx-auto px-5 py-8 min-h-screen flex-col justify-between">
     <div>
-      <!-- Topo com Logo -->
       <header class="flex flex-col items-center text-center mb-6">
         <img
           src="logo.png"
@@ -342,7 +318,6 @@
         </span>
       </header>
 
-      <!-- Card Pix -->
       <div class="rounded-3xl bg-white border-2 border-slate-100 p-6 shadow-xl shadow-slate-200/60 text-center">
         <div class="w-14 h-14 rounded-2xl bg-[#E8FFF0] border border-[#00E65B] text-[#009E3E] flex items-center justify-center mx-auto mb-3 neon-pulse">
           <i data-lucide="qr-code" class="w-7 h-7"></i>
@@ -355,7 +330,6 @@
           Copie a chave Pix abaixo, faça o pagamento no banco de sua preferência e toque em confirmar para liberar o painel.
         </p>
 
-        <!-- Valor em Destaque -->
         <div class="my-5 p-4 rounded-2xl bg-slate-50 border border-slate-200">
           <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400">Valor a pagar via Pix</span>
           <span id="pixAmountDisplay" class="block text-3xl font-black text-[#00A843] tabular-nums mt-0.5">
@@ -366,22 +340,18 @@
           </span>
         </div>
 
-        <!-- Campo Copia e Cola -->
         <div class="text-left mb-4">
           <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">
             Chave Pix (Copia e Cola)
           </label>
-          <div class="relative">
-            <textarea
-              id="pixKeyBox"
-              readonly
-              rows="3"
-              class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-[11px] font-mono text-slate-700 resize-none outline-none break-all"
-            ></textarea>
-          </div>
+          <textarea
+            id="pixKeyBox"
+            readonly
+            rows="3"
+            class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-[11px] font-mono text-slate-700 resize-none outline-none break-all"
+          ></textarea>
         </div>
 
-        <!-- Botão Copiar Chave Pix -->
         <button
           type="button"
           onclick="copyPixCode()"
@@ -391,9 +361,9 @@
           <span>Copiar Chave Pix</span>
         </button>
 
-        <!-- Botão Confirmar Pagamento -->
         <button
           type="button"
+          id="confirmPixBtn"
           onclick="confirmPixActivation()"
           class="w-full py-4 px-4 rounded-2xl bg-[#00E65B] hover:bg-[#00D453] active:scale-[0.98] text-slate-950 font-black text-sm neon-glow transition-all flex items-center justify-center gap-2"
         >
@@ -401,7 +371,6 @@
           <span>Já fiz o Pix, Liberar Acesso</span>
         </button>
 
-        <!-- Aviso sobre a mensalidade de 30 dias -->
         <div class="mt-5 p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-left flex items-start gap-2.5">
           <i data-lucide="calendar-clock" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
           <p class="text-[11px] text-amber-900 leading-relaxed">
@@ -425,20 +394,27 @@
   <div id="appScreen" class="hidden flex-col justify-between min-h-screen pb-28 bg-white">
     <main class="w-full max-w-2xl mx-auto px-4 sm:px-6 pt-4 pb-6 flex-1">
 
-      <!-- BARRA SUPERIOR: PLACA / MOTORISTA / DIAS RESTANTES / SAIR -->
-      <div class="flex items-center justify-between gap-2 mb-4">
-        <div class="flex items-center gap-2">
+      <!-- BARRA SUPERIOR: PLACA / STATUS NUVEM / DIAS RESTANTES / SAIR -->
+      <div class="flex items-center justify-between gap-2 mb-4 flex-wrap">
+        <div class="flex items-center gap-1.5">
           <span id="plateBadge" class="px-3 py-1.5 rounded-full bg-slate-900 text-white text-xs font-black tracking-wider uppercase">
             ABC-1D23
           </span>
-          <span id="daysRemainingBadge" class="px-2.5 py-1.5 rounded-full bg-[#E8FFF0] border border-[#00E65B]/60 text-[11px] font-bold text-slate-800">
-            30 dias ativos
-          </span>
+          <button
+            type="button"
+            onclick="syncWithCloud(true)"
+            class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 border border-slate-200 text-[11px] font-bold text-slate-700 transition-colors"
+            title="Sincronizar com Google Drive"
+          >
+            <span id="syncDot" class="w-2 h-2 rounded-full bg-[#00E65B]"></span>
+            <span id="syncText">Nuvem</span>
+            <i data-lucide="refresh-cw" id="syncIcon" class="w-3 h-3 text-slate-500"></i>
+          </button>
         </div>
 
         <div class="flex items-center gap-1.5">
-          <span id="driverNameBadge" class="hidden sm:inline-block text-xs font-bold text-slate-600 px-2 truncate max-w-[140px]">
-            Motorista
+          <span id="daysRemainingBadge" class="px-2.5 py-1.5 rounded-full bg-[#E8FFF0] border border-[#00E65B]/60 text-[11px] font-bold text-slate-800">
+            30 dias
           </span>
           <button
             type="button"
@@ -451,7 +427,7 @@
         </div>
       </div>
 
-      <!-- LOGO CENTRALIZADO EM TAMANHO GRANDE NA TELA INICIAL -->
+      <!-- LOGO CENTRALIZADO EM TAMANHO GRANDE -->
       <header class="flex flex-col items-center justify-center text-center mb-6">
         <img
           src="logo.png"
@@ -460,7 +436,6 @@
           onerror="this.style.display='none'; document.getElementById('appLogoFallback').classList.remove('hidden');"
         />
 
-        <!-- Fallback SVG caso logo.png não exista -->
         <div id="appLogoFallback" class="hidden flex flex-col items-center justify-center py-2">
           <div class="flex items-center gap-3.5 px-6 py-3 rounded-3xl bg-slate-50 border-2 border-slate-100 shadow-sm">
             <div class="w-12 h-12 rounded-2xl bg-[#00E65B] flex items-center justify-center text-slate-950 shadow-sm">
@@ -478,7 +453,7 @@
         </div>
       </header>
 
-      <!-- FILTROS DE PERÍODO: DIÁRIO, SEMANAL, QUINZENAL, MENSAL, SEMESTRAL, ANUAL -->
+      <!-- FILTROS DE PERÍODO -->
       <section aria-label="Filtro de Período" class="mb-5">
         <div class="grid grid-cols-3 sm:grid-cols-6 gap-1.5 bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
           <button type="button" onclick="setPeriodFilter('daily')" id="filter-daily" class="filter-btn py-2 px-2 rounded-xl text-xs font-extrabold transition-all bg-[#00E65B] text-slate-950 shadow-sm">
@@ -504,8 +479,6 @@
 
       <!-- DASHBOARD FINANCEIRO -->
       <section aria-label="Resumo Financeiro" class="space-y-3.5 mb-5">
-
-        <!-- CARD PRINCIPAL: LUCRO LÍQUIDO REAL -->
         <div class="relative overflow-hidden rounded-3xl bg-white border-2 border-slate-100 p-5 sm:p-6 shadow-xl shadow-slate-200/50">
           <div class="flex items-center justify-between mb-1.5">
             <div class="flex items-center gap-2">
@@ -527,16 +500,13 @@
             Quanto realmente sobrou livre no seu bolso neste período.
           </p>
 
-          <!-- Barra de Proporção Lucro x Custos -->
           <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden mt-4 flex border border-slate-200/60">
             <div id="profitProgressBar" class="bg-[#00E65B] h-full transition-all duration-500" style="width: 100%"></div>
             <div id="costProgressBar" class="bg-red-500 h-full transition-all duration-500" style="width: 0%"></div>
           </div>
         </div>
 
-        <!-- GRID: FATURAMENTO BRUTO E TOTAL DE CUSTOS -->
         <div class="grid grid-cols-2 gap-3">
-          <!-- Faturamento Bruto (Fretes) -->
           <div class="rounded-2xl bg-slate-50 border border-slate-200/80 p-4 flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
               <span class="text-xs font-bold text-slate-500">Bruto (Fretes)</span>
@@ -554,7 +524,6 @@
             </div>
           </div>
 
-          <!-- Total de Custos -->
           <div class="rounded-2xl bg-slate-50 border border-slate-200/80 p-4 flex flex-col justify-between">
             <div class="flex items-center justify-between mb-2">
               <span class="text-xs font-bold text-slate-500">Total Custos</span>
@@ -573,7 +542,6 @@
           </div>
         </div>
 
-        <!-- MÉTRICAS EXTRAS: LUCRO MÉDIO POR FRETE E R$/KM -->
         <div class="grid grid-cols-2 gap-3">
           <div class="rounded-2xl bg-white border border-slate-200 px-4 py-3 flex items-center gap-3 shadow-sm">
             <div class="w-9 h-9 rounded-xl bg-[#E8FFF0] text-[#009E3E] flex items-center justify-center shrink-0">
@@ -599,10 +567,9 @@
             </div>
           </div>
         </div>
-
       </section>
 
-      <!-- AÇÕES RÁPIDAS: WHATSAPP E EXPORTAÇÃO CSV -->
+      <!-- AÇÕES RÁPIDAS -->
       <section aria-label="Compartilhar e Exportar" class="grid grid-cols-2 gap-2.5 mb-6">
         <button type="button" onclick="shareWhatsAppSummary()" class="flex items-center justify-center gap-2 py-3 px-3 rounded-2xl bg-[#E8FFF0] hover:bg-[#D5FCE3] active:scale-[0.98] border border-[#00E65B]/60 text-xs font-extrabold text-slate-900 transition-all">
           <i data-lucide="share-2" class="w-4 h-4 text-[#009E3E]"></i>
@@ -614,7 +581,7 @@
         </button>
       </section>
 
-      <!-- HISTÓRICO / EXTRATO DE LANÇAMENTOS -->
+      <!-- EXTRATO -->
       <section aria-label="Histórico de Lançamentos">
         <div class="flex items-center justify-between mb-3">
           <h2 class="text-sm font-black text-slate-900 tracking-wide flex items-center gap-2">
@@ -626,10 +593,8 @@
           </span>
         </div>
 
-        <!-- Lista Dinâmica -->
         <div id="transactionsList" class="space-y-2.5"></div>
 
-        <!-- Estado Vazio -->
         <div id="emptyState" class="hidden rounded-3xl bg-slate-50 border border-slate-200 p-7 text-center">
           <div class="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center mx-auto mb-3 text-[#00B848] shadow-sm">
             <i data-lucide="truck" class="w-6 h-6"></i>
@@ -641,16 +606,14 @@
         </div>
       </section>
 
-      <!-- RODAPÉ -->
       <footer class="mt-10 pt-4 border-t border-slate-100 text-center">
         <p class="text-[11px] text-slate-400 font-medium">
           PayFrete &bull; O amigo do freteiro
         </p>
       </footer>
-
     </main>
 
-    <!-- BARRA FIXA INFERIOR COM 2 BOTÕES GRANDES -->
+    <!-- BARRA FIXA INFERIOR -->
     <div class="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-3">
       <div class="max-w-2xl mx-auto grid grid-cols-2 gap-3">
         <button
@@ -676,7 +639,7 @@
 
 
   <!-- =====================================================================
-       MODAL 1: + NOVO FRETE (COM ROTAS FAVORITAS EM 1 TOQUE)
+       MODAL 1: + NOVO FRETE
        ===================================================================== -->
   <div id="routeModal" class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center bg-slate-900/60 backdrop-blur-sm p-0 sm:p-4 overflow-y-auto">
     <div class="w-full max-w-lg bg-white border-t sm:border border-slate-200 rounded-t-3xl sm:rounded-3xl p-5 sm:p-6 animate-slide-up shadow-2xl max-h-[92vh] overflow-y-auto">
@@ -695,7 +658,6 @@
         </button>
       </div>
 
-      <!-- FRETES FAVORITOS (1 TOQUE) -->
       <div class="mb-4 p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
         <div class="flex items-center justify-between mb-2.5">
           <span class="text-[11px] font-extrabold uppercase tracking-wider text-[#009E3E] flex items-center gap-1.5">
@@ -709,7 +671,6 @@
 
         <div id="presetButtonsContainer" class="flex flex-wrap gap-2"></div>
 
-        <!-- Mini-formulário para criar Frete Favorito -->
         <div id="presetCreatorBox" class="hidden mt-3 pt-3 border-t border-slate-200 space-y-2.5">
           <p class="text-[11px] font-bold text-slate-700">Novo Frete Padrão:</p>
           <div class="grid grid-cols-12 gap-2">
@@ -724,7 +685,6 @@
         </div>
       </div>
 
-      <!-- FORMULÁRIO DO FRETE -->
       <form id="routeForm" onsubmit="handleSaveRoute(event)" class="space-y-4">
         <div>
           <label for="routeAmount" class="block text-xs font-bold text-slate-700 mb-1.5">Valor do Frete (R$) *</label>
@@ -889,7 +849,7 @@
         <i data-lucide="trash-2" class="w-6 h-6"></i>
       </div>
       <h3 class="text-base font-black text-slate-900 mb-1">Excluir lançamento?</h3>
-      <p class="text-xs text-slate-500 mb-5">Este registro será removido do seu controle financeiro.</p>
+      <p class="text-xs text-slate-500 mb-5">O registro será apagado do seu aparelho e da nuvem.</p>
       <div class="grid grid-cols-2 gap-2.5">
         <button type="button" onclick="closeDeleteModal()" class="py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700">
           Cancelar
@@ -910,89 +870,95 @@
 
 
   <!-- =====================================================================
-       LÓGICA COMPLETA: SPLASH + CADASTRO + PIX 30 DIAS + DASHBOARD
+       LÓGICA COMPLETA: NUVEM GOOGLE DRIVE + PIX 30 DIAS + CACHE OFFLINE
        ===================================================================== -->
   <script>
     // =========================================================================
-    // CONFIGURAÇÃO DE CHAVES PIX (EDITE A MENSALIDADE AQUI QUANDO QUISER)
+    // 1. URL DO GOOGLE APPS SCRIPT CONECTADA
+    // =========================================================================
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyUsrai0uYgPn12C8TymofeLhwz6QC_SYc2IhnliHqz6gssi2cir1BM_7NZyzmshr3J/exec";
+
+    // =========================================================================
+    // 2. CHAVES PIX (ATIVAÇÃO R$ 19,90 E MENSALIDADE R$ 9,90)
     // =========================================================================
     const PIX_ATIVACAO_KEY = "00020101021226720014BR.-GOV.BCP.PIX0124cristian-scherer@jim.com0222Pagamentocristian-sch520400005303986540519.905802BR5916CRISTIANSCHERER6012SAOLEOPOLDO62290525QRC-CXN0x6k2OsrRI5jSbKj-HFd63045B86";
-    const PIX_MENSALIDADE_KEY = "CHAVE_PIX_MENSALIDADE_9_90_AQUI"; // <-- Substitua depois pela chave Pix de R$ 9,90
+    const PIX_MENSALIDADE_KEY = "CHAVE_PIX_MENSALIDADE_9_90_AQUI";
 
     const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
-    const DRIVERS_DB_KEY = 'payfrete_drivers_db_v1';
-    const ACTIVE_PLATE_KEY = 'payfrete_active_plate_v1';
+    const SESSION_KEY = 'payfrete_cloud_session_v1';
 
     let currentDriver = null;
     let transactions = [];
     let routePresets = [];
+    let pendingQueue = [];
     let currentFilter = 'daily';
+    let currentPixMode = 'activation';
     let itemToDeleteId = null;
 
-    // Inicialização com Splash Screen de 2 segundos
+    // Splash Screen de 2 segundos
     document.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
 
-      // Inicia barra de progresso da Splash Screen
       requestAnimationFrame(() => {
         const bar = document.getElementById('splashProgress');
         if (bar) bar.style.width = '100%';
       });
 
-      // Após exatamente 2000ms (2 segundos), oculta splash e abre a tela certa
       setTimeout(() => {
         const splash = document.getElementById('splashScreen');
         splash.classList.add('opacity-0');
         setTimeout(() => {
           splash.classList.add('hidden');
-          routeUserAfterSplash();
+          checkExistingSession();
         }, 250);
       }, 2000);
     });
 
-    function routeUserAfterSplash() {
-      const savedPlate = localStorage.getItem(ACTIVE_PLATE_KEY);
-      if (!savedPlate) {
+    function checkExistingSession() {
+      try {
+        const rawSession = localStorage.getItem(SESSION_KEY);
+        if (!rawSession) {
+          showAuthScreen();
+          return;
+        }
+        currentDriver = JSON.parse(rawSession);
+        loadLocalCache(currentDriver.plate);
+        evaluateSubscriptionAndRoute();
+        syncWithCloud(false);
+      } catch (e) {
         showAuthScreen();
-        return;
       }
-
-      const db = getDriversDB();
-      const driver = db[savedPlate];
-      if (!driver) {
-        localStorage.removeItem(ACTIVE_PLATE_KEY);
-        showAuthScreen();
-        return;
-      }
-
-      currentDriver = driver;
-      evaluateSubscriptionAndRoute();
     }
 
-    // Verifica se o motorista está ativo ou se venceu os 30 dias
     function evaluateSubscriptionAndRoute() {
       const now = Date.now();
-
-      // 1. Nunca pagou a ativação inicial de R$ 19,90
-      if (!currentDriver.activatedAt) {
+      if (!currentDriver.lastPaidAt || currentDriver.lastPaidAt === 0) {
         showPixScreen('activation');
         return;
       }
-
-      // 2. Verifica se já passaram 30 dias desde a ativação/última renovação
-      const elapsed = now - currentDriver.lastPaidAt;
-      if (elapsed >= THIRTY_DAYS_MS) {
+      if ((now - currentDriver.lastPaidAt) >= THIRTY_DAYS_MS) {
         showPixScreen('renewal');
         return;
       }
-
-      // 3. Tudo em dia: carrega dados e abre o painel
-      loadDriverFinancialData(currentDriver.plate);
       showAppScreen();
     }
 
+    // Chamada HTTP ao Google Apps Script
+    async function callCloud(payload) {
+      const response = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        throw new Error("Falha de conexão com o servidor.");
+      }
+      return await response.json();
+    }
+
     // =========================================================================
-    // NAVEGAÇÃO ENTRE TELAS
+    // TELAS
     // =========================================================================
     function showAuthScreen() {
       document.getElementById('authScreen').classList.remove('hidden');
@@ -1003,6 +969,7 @@
     }
 
     function showPixScreen(mode) {
+      currentPixMode = mode;
       document.getElementById('authScreen').classList.add('hidden');
       document.getElementById('appScreen').classList.add('hidden');
       document.getElementById('pixScreen').classList.remove('hidden');
@@ -1041,12 +1008,10 @@
       document.getElementById('appScreen').classList.add('flex');
 
       document.getElementById('plateBadge').textContent = currentDriver.plate;
-      document.getElementById('driverNameBadge').textContent = currentDriver.name;
 
-      // Calcula dias restantes até a próxima renovação de 30 dias
       const elapsed = Date.now() - currentDriver.lastPaidAt;
       const daysLeft = Math.max(1, Math.ceil((THIRTY_DAYS_MS - elapsed) / (24 * 60 * 60 * 1000)));
-      document.getElementById('daysRemainingBadge').textContent = `${daysLeft} ${daysLeft === 1 ? 'dia ativo' : 'dias ativos'}`;
+      document.getElementById('daysRemainingBadge').textContent = `${daysLeft}d ativos`;
 
       setDefaultDates();
       renderPresets();
@@ -1055,7 +1020,7 @@
     }
 
     // =========================================================================
-    // LOGIN, CADASTRO E PIX
+    // LOGIN, CADASTRO E CONFIRMAÇÃO PIX NA NUVEM
     // =========================================================================
     function switchAuthTab(tab) {
       const loginForm = document.getElementById('loginForm');
@@ -1077,77 +1042,92 @@
       }
     }
 
-    function handleRegister(event) {
+    async function handleRegister(event) {
       event.preventDefault();
       const name = document.getElementById('regName').value.trim();
       const plate = normalizePlate(document.getElementById('regPlate').value);
       const pin = document.getElementById('regPin').value.trim();
       const phone = document.getElementById('regPhone').value.replace(/\D/g, '');
+      const btn = document.getElementById('registerBtn');
 
-      if (plate.length < 7) {
-        showAuthError('Digite uma placa válida (ex: ABC-1D23).');
-        return;
+      if (plate.length < 7) return showAuthError('Digite uma placa válida (ex: ABC-1D23).');
+      if (!/^\d{4}$/.test(pin)) return showAuthError('A senha deve ter exatamente 4 números.');
+      if (phone.length < 10) return showAuthError('Digite o telefone completo com DDD.');
+
+      const origHTML = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Salvando no Google Drive...</span>`;
+      lucide.createIcons();
+
+      try {
+        const res = await callCloud({ action: 'register', name, plate, phone, pin });
+        if (!res.ok) {
+          showAuthError(res.error || 'Erro ao cadastrar.');
+          btn.disabled = false;
+          btn.innerHTML = origHTML;
+          lucide.createIcons();
+          return;
+        }
+
+        currentDriver = res.driver;
+        transactions = [];
+        routePresets = [
+          { id: 'p1', name: 'Frete Urbano / Local', amount: 120, km: 25 },
+          { id: 'p2', name: 'Diária / Rota Fechada', amount: 280, km: 90 }
+        ];
+
+        localStorage.setItem(SESSION_KEY, JSON.stringify(currentDriver));
+        saveLocalCache(plate);
+
+        btn.disabled = false;
+        btn.innerHTML = origHTML;
+        showPixScreen('activation');
+      } catch (err) {
+        showAuthError(err.message || 'Erro de conexão com a nuvem.');
+        btn.disabled = false;
+        btn.innerHTML = origHTML;
+        lucide.createIcons();
       }
-      if (!/^\d{4}$/.test(pin)) {
-        showAuthError('A senha deve ter exatamente 4 números.');
-        return;
-      }
-      if (phone.length < 10) {
-        showAuthError('Digite o telefone completo com DDD.');
-        return;
-      }
-
-      const db = getDriversDB();
-      if (db[plate]) {
-        showAuthError('Esta placa já está cadastrada. Acesse na aba "Já tenho cadastro".');
-        return;
-      }
-
-      const newDriver = {
-        name,
-        plate,
-        phone,
-        pin,
-        createdAt: Date.now(),
-        activatedAt: null,
-        lastPaidAt: null
-      };
-
-      db[plate] = newDriver;
-      saveDriversDB(db);
-      localStorage.setItem(ACTIVE_PLATE_KEY, plate);
-      currentDriver = newDriver;
-
-      // Cria presets iniciais úteis para freteiros
-      saveDriverFinancialData(plate, [], [
-        { id: 'p1', name: 'Frete Urbano / Local', amount: 120, km: 25 },
-        { id: 'p2', name: 'Diária / Rota Fechada', amount: 280, km: 90 }
-      ]);
-
-      showPixScreen('activation');
     }
 
-    function handleLogin(event) {
+    async function handleLogin(event) {
       event.preventDefault();
       const plate = normalizePlate(document.getElementById('loginPlate').value);
       const pin = document.getElementById('loginPin').value.trim();
+      const btn = document.getElementById('loginBtn');
 
-      const db = getDriversDB();
-      const driver = db[plate];
+      const origHTML = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Conectando à Nuvem...</span>`;
+      lucide.createIcons();
 
-      if (!driver) {
-        showAuthError('Placa não encontrada. Faça seu "Primeiro Cadastro" na aba ao lado.');
-        return;
+      try {
+        const res = await callCloud({ action: 'login', plate, pin });
+        if (!res.ok) {
+          showAuthError(res.error || 'Placa ou senha inválidos.');
+          btn.disabled = false;
+          btn.innerHTML = origHTML;
+          lucide.createIcons();
+          return;
+        }
+
+        currentDriver = res.driver;
+        transactions = res.transactions || [];
+        routePresets = res.presets || [];
+        pendingQueue = [];
+
+        localStorage.setItem(SESSION_KEY, JSON.stringify(currentDriver));
+        saveLocalCache(plate);
+
+        btn.disabled = false;
+        btn.innerHTML = origHTML;
+        evaluateSubscriptionAndRoute();
+      } catch (err) {
+        showAuthError(err.message || 'Sem conexão com a nuvem.');
+        btn.disabled = false;
+        btn.innerHTML = origHTML;
+        lucide.createIcons();
       }
-
-      if (driver.pin !== pin) {
-        showAuthError('Senha de 4 dígitos incorreta.');
-        return;
-      }
-
-      localStorage.setItem(ACTIVE_PLATE_KEY, plate);
-      currentDriver = driver;
-      evaluateSubscriptionAndRoute();
     }
 
     function copyPixCode() {
@@ -1162,23 +1142,46 @@
       });
     }
 
-    function confirmPixActivation() {
-      const now = Date.now();
-      const db = getDriversDB();
-      if (!currentDriver.activatedAt) {
-        currentDriver.activatedAt = now;
-      }
-      currentDriver.lastPaidAt = now;
-      db[currentDriver.plate] = currentDriver;
-      saveDriversDB(db);
+    async function confirmPixActivation() {
+      const btn = document.getElementById('confirmPixBtn');
+      const origHTML = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Liberando na Nuvem...</span>`;
+      lucide.createIcons();
 
-      loadDriverFinancialData(currentDriver.plate);
-      showAppScreen();
-      showToast('Acesso liberado por 30 dias! Boas rotas!', 'success');
+      try {
+        const res = await callCloud({
+          action: 'confirmPayment',
+          plate: currentDriver.plate,
+          mode: currentPixMode
+        });
+
+        if (res.ok) {
+          currentDriver.lastPaidAt = res.lastPaidAt;
+          currentDriver.activatedAt = res.activatedAt;
+          transactions = res.transactions || transactions;
+          routePresets = res.presets || routePresets;
+          localStorage.setItem(SESSION_KEY, JSON.stringify(currentDriver));
+          saveLocalCache(currentDriver.plate);
+          showAppScreen();
+          showToast('Acesso liberado por 30 dias na nuvem!', 'success');
+        } else {
+          showToast(res.error || 'Erro ao confirmar.', 'error');
+        }
+      } catch (e) {
+        currentDriver.lastPaidAt = Date.now();
+        localStorage.setItem(SESSION_KEY, JSON.stringify(currentDriver));
+        showAppScreen();
+        showToast('Acesso liberado!', 'success');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = origHTML;
+        lucide.createIcons();
+      }
     }
 
     function logoutDriver() {
-      localStorage.removeItem(ACTIVE_PLATE_KEY);
+      localStorage.removeItem(SESSION_KEY);
       currentDriver = null;
       transactions = [];
       routePresets = [];
@@ -1193,42 +1196,109 @@
     }
 
     // =========================================================================
-    // PERSISTÊNCIA LOCAL POR PLACA
+    // SINCRONIZAÇÃO COM GOOGLE DRIVE + CACHE LOCAL OFFLINE
     // =========================================================================
-    function getDriversDB() {
-      try {
-        return JSON.parse(localStorage.getItem(DRIVERS_DB_KEY) || '{}');
-      } catch (e) {
-        return {};
-      }
+    function saveLocalCache(plate) {
+      localStorage.setItem(`payfrete_cache_${plate}`, JSON.stringify({
+        transactions,
+        routePresets,
+        pendingQueue
+      }));
     }
 
-    function saveDriversDB(db) {
-      localStorage.setItem(DRIVERS_DB_KEY, JSON.stringify(db));
-    }
-
-    function loadDriverFinancialData(plate) {
+    function loadLocalCache(plate) {
       try {
-        const raw = localStorage.getItem(`payfrete_data_${plate}`);
+        const raw = localStorage.getItem(`payfrete_cache_${plate}`);
         if (raw) {
           const parsed = JSON.parse(raw);
           transactions = parsed.transactions || [];
           routePresets = parsed.routePresets || [];
-        } else {
-          transactions = [];
-          routePresets = [];
+          pendingQueue = parsed.pendingQueue || [];
         }
       } catch (e) {
         transactions = [];
         routePresets = [];
+        pendingQueue = [];
       }
     }
 
-    function saveDriverFinancialData(plate, txList = transactions, presetsList = routePresets) {
-      localStorage.setItem(`payfrete_data_${plate}`, JSON.stringify({
-        transactions: txList,
-        routePresets: presetsList
-      }));
+    async function syncWithCloud(manual = false) {
+      if (!currentDriver) return;
+      setSyncStatus('syncing', 'Sincronizando');
+
+      try {
+        if (pendingQueue.length > 0) {
+          const copy = [...pendingQueue];
+          for (const task of copy) {
+            await callCloud(task);
+            pendingQueue.shift();
+          }
+          saveLocalCache(currentDriver.plate);
+        }
+
+        const res = await callCloud({
+          action: 'syncData',
+          plate: currentDriver.plate
+        });
+
+        if (res.blocked) {
+          showToast('Acesso suspenso pela administração.', 'error');
+          logoutDriver();
+          return;
+        }
+
+        if (res.ok) {
+          transactions = res.transactions || [];
+          routePresets = res.presets || [];
+          if (res.lastPaidAt) {
+            currentDriver.lastPaidAt = res.lastPaidAt;
+            localStorage.setItem(SESSION_KEY, JSON.stringify(currentDriver));
+          }
+          saveLocalCache(currentDriver.plate);
+          renderPresets();
+          renderApp();
+          setSyncStatus('synced', 'Nuvem OK');
+          if (manual) showToast('Sincronizado com o Google Drive!', 'success');
+        }
+      } catch (e) {
+        setSyncStatus('offline', 'Offline');
+        if (manual) showToast('Sem sinal. Seus dados estão salvos no aparelho.', 'neutral');
+      }
+    }
+
+    async function pushCloudTask(payload) {
+      if (!currentDriver) return;
+      setSyncStatus('syncing', 'Salvando');
+      try {
+        const res = await callCloud(payload);
+        if (res && res.ok) {
+          setSyncStatus('synced', 'Nuvem OK');
+        } else {
+          throw new Error();
+        }
+      } catch (e) {
+        pendingQueue.push(payload);
+        saveLocalCache(currentDriver.plate);
+        setSyncStatus('offline', 'Fila Nuvem');
+      }
+    }
+
+    function setSyncStatus(state, text) {
+      const dot = document.getElementById('syncDot');
+      const label = document.getElementById('syncText');
+      const icon = document.getElementById('syncIcon');
+      if (!dot || !label) return;
+
+      label.textContent = text;
+      icon.classList.remove('animate-spin');
+
+      if (state === 'synced') dot.className = 'w-2 h-2 rounded-full bg-[#00E65B]';
+      else if (state === 'syncing') {
+        dot.className = 'w-2 h-2 rounded-full bg-amber-400';
+        icon.classList.add('animate-spin');
+      } else {
+        dot.className = 'w-2 h-2 rounded-full bg-slate-400';
+      }
     }
 
     // =========================================================================
@@ -1244,7 +1314,7 @@
       }
 
       container.innerHTML = routePresets.map(p => `
-        <div class="inline-flex items-center rounded-xl bg-white border border-slate-200 hover:border-[#00C850] transition-all overflow-hidden shadow-xs">
+        <div class="inline-flex items-center rounded-xl bg-white border border-slate-200 hover:border-[#00C850] transition-all overflow-hidden">
           <button
             type="button"
             onclick="applyPreset('${p.id}')"
@@ -1256,7 +1326,7 @@
           <button
             type="button"
             onclick="deletePreset('${p.id}')"
-            title="Remover favorito"
+            title="Remover favorita"
             class="px-2 py-2 text-slate-400 hover:text-red-500 border-l border-slate-100"
           >
             <i data-lucide="x" class="w-3 h-3"></i>
@@ -1270,12 +1340,9 @@
     function applyPreset(presetId) {
       const preset = routePresets.find(p => p.id === presetId);
       if (!preset) return;
-
       document.getElementById('routeAmount').value = preset.amount;
       document.getElementById('routeDesc').value = preset.name;
-      if (preset.km > 0) {
-        document.getElementById('routeKm').value = preset.km;
-      }
+      if (preset.km > 0) document.getElementById('routeKm').value = preset.km;
       showToast(`"${preset.name}" preenchido!`, 'success');
     }
 
@@ -1295,7 +1362,7 @@
 
       const newPreset = { id: 'p_' + Date.now(), name, amount, km };
       routePresets.push(newPreset);
-      saveDriverFinancialData(currentDriver.plate);
+      saveLocalCache(currentDriver.plate);
       renderPresets();
       applyPreset(newPreset.id);
 
@@ -1303,12 +1370,24 @@
       document.getElementById('newPresetAmount').value = '';
       document.getElementById('newPresetKm').value = '';
       togglePresetCreator();
+
+      pushCloudTask({
+        action: 'savePreset',
+        plate: currentDriver.plate,
+        preset: newPreset
+      });
     }
 
     function deletePreset(presetId) {
       routePresets = routePresets.filter(p => p.id !== presetId);
-      saveDriverFinancialData(currentDriver.plate);
+      saveLocalCache(currentDriver.plate);
       renderPresets();
+
+      pushCloudTask({
+        action: 'deletePreset',
+        plate: currentDriver.plate,
+        id: presetId
+      });
     }
 
     // =========================================================================
@@ -1323,7 +1402,7 @@
 
       if (!amount || amount <= 0 || !desc || !date) return;
 
-      transactions.unshift({
+      const tx = {
         id: 'tx_' + Date.now(),
         type: 'route',
         amount,
@@ -1332,12 +1411,19 @@
         km,
         date,
         createdAt: Date.now()
-      });
+      };
 
-      saveDriverFinancialData(currentDriver.plate);
+      transactions.unshift(tx);
+      saveLocalCache(currentDriver.plate);
       closeModal('route');
       renderApp();
-      showToast(`Frete de ${formatBRL(amount)} registrado!`, 'success');
+      showToast(`Frete de ${formatBRL(amount)} salvo na nuvem!`, 'success');
+
+      pushCloudTask({
+        action: 'addTransaction',
+        plate: currentDriver.plate,
+        transaction: tx
+      });
     }
 
     function handleSaveExpense(event) {
@@ -1349,7 +1435,7 @@
 
       if (!amount || amount <= 0 || !date) return;
 
-      transactions.unshift({
+      const tx = {
         id: 'tx_' + Date.now(),
         type: 'expense',
         amount,
@@ -1358,12 +1444,19 @@
         km: 0,
         date,
         createdAt: Date.now()
-      });
+      };
 
-      saveDriverFinancialData(currentDriver.plate);
+      transactions.unshift(tx);
+      saveLocalCache(currentDriver.plate);
       closeModal('expense');
       renderApp();
       showToast(`Gasto de ${formatBRL(amount)} salvo!`, 'error');
+
+      pushCloudTask({
+        action: 'addTransaction',
+        plate: currentDriver.plate,
+        transaction: tx
+      });
     }
 
     function requestDelete(id) {
@@ -1373,11 +1466,18 @@
       modal.classList.add('flex');
 
       document.getElementById('confirmDeleteBtn').onclick = () => {
-        transactions = transactions.filter(t => t.id !== itemToDeleteId);
-        saveDriverFinancialData(currentDriver.plate);
+        const deletedId = itemToDeleteId;
+        transactions = transactions.filter(t => t.id !== deletedId);
+        saveLocalCache(currentDriver.plate);
         closeDeleteModal();
         renderApp();
         showToast('Lançamento excluído.', 'neutral');
+
+        pushCloudTask({
+          action: 'deleteTransaction',
+          plate: currentDriver.plate,
+          id: deletedId
+        });
       };
     }
 
@@ -1389,7 +1489,7 @@
     }
 
     // =========================================================================
-    // FILTROS: DIÁRIO, SEMANAL, QUINZENAL, MENSAL, SEMESTRAL, ANUAL
+    // FILTROS E RENDERIZAÇÃO
     // =========================================================================
     function setPeriodFilter(period) {
       currentFilter = period;
@@ -1418,19 +1518,13 @@
       const todayDate = new Date(todayStr + 'T00:00:00');
 
       return transactions.filter(item => {
-        if (currentFilter === 'daily') {
-          return item.date === todayStr;
-        }
+        if (currentFilter === 'daily') return item.date === todayStr;
 
         const itemDate = new Date(item.date + 'T00:00:00');
         const diffDays = Math.floor((todayDate - itemDate) / (24 * 60 * 60 * 1000));
 
-        if (currentFilter === 'weekly') {
-          return diffDays >= 0 && diffDays < 7;
-        }
-        if (currentFilter === 'biweekly') {
-          return diffDays >= 0 && diffDays < 15;
-        }
+        if (currentFilter === 'weekly') return diffDays >= 0 && diffDays < 7;
+        if (currentFilter === 'biweekly') return diffDays >= 0 && diffDays < 15;
         if (currentFilter === 'monthly') {
           return itemDate.getMonth() === todayDate.getMonth() &&
                  itemDate.getFullYear() === todayDate.getFullYear();
@@ -1455,27 +1549,18 @@
         return { icon: 'truck', colorClass: 'text-[#009E3E] bg-[#E8FFF0] border-[#00E65B]/50' };
       }
       switch (item.category) {
-        case 'Combustível':
-          return { icon: 'fuel', colorClass: 'text-red-600 bg-red-50 border-red-200' };
-        case 'Manutenção':
-          return { icon: 'wrench', colorClass: 'text-amber-600 bg-amber-50 border-amber-200' };
-        case 'Pedágio':
-          return { icon: 'ticket', colorClass: 'text-sky-600 bg-sky-50 border-sky-200' };
-        case 'Alimentação':
-          return { icon: 'utensils', colorClass: 'text-orange-600 bg-orange-50 border-orange-200' };
-        default:
-          return { icon: 'receipt', colorClass: 'text-purple-600 bg-purple-50 border-purple-200' };
+        case 'Combustível': return { icon: 'fuel', colorClass: 'text-red-600 bg-red-50 border-red-200' };
+        case 'Manutenção': return { icon: 'wrench', colorClass: 'text-amber-600 bg-amber-50 border-amber-200' };
+        case 'Pedágio': return { icon: 'ticket', colorClass: 'text-sky-600 bg-sky-50 border-sky-200' };
+        case 'Alimentação': return { icon: 'utensils', colorClass: 'text-orange-600 bg-orange-50 border-orange-200' };
+        default: return { icon: 'receipt', colorClass: 'text-purple-600 bg-purple-50 border-purple-200' };
       }
     }
 
     function renderApp() {
       const filtered = getFilteredTransactions();
 
-      let grossRevenue = 0;
-      let totalExpenses = 0;
-      let routeCount = 0;
-      let expenseCount = 0;
-      let totalKm = 0;
+      let grossRevenue = 0, totalExpenses = 0, routeCount = 0, expenseCount = 0, totalKm = 0;
 
       filtered.forEach(item => {
         if (item.type === 'route') {
@@ -1491,7 +1576,6 @@
       const netProfit = grossRevenue - totalExpenses;
       const avgProfit = routeCount > 0 ? (netProfit / routeCount) : 0;
 
-      // Lucro Líquido
       const netProfitEl = document.getElementById('netProfitValue');
       netProfitEl.textContent = formatBRL(netProfit);
       if (netProfit < 0) {
@@ -1502,7 +1586,6 @@
         netProfitEl.classList.add('text-[#00A843]');
       }
 
-      // Margem e Barra
       const marginBadge = document.getElementById('profitMarginBadge');
       const profitBar = document.getElementById('profitProgressBar');
       const costBar = document.getElementById('costProgressBar');
@@ -1519,14 +1602,12 @@
         costBar.style.width = totalExpenses > 0 ? '100%' : '0%';
       }
 
-      // Bruto e Custos
       document.getElementById('grossRevenueValue').textContent = formatBRL(grossRevenue);
       document.getElementById('routeCountLabel').textContent = `${routeCount} ${routeCount === 1 ? 'frete feito' : 'fretes feitos'}`;
 
       document.getElementById('totalExpensesValue').textContent = formatBRL(totalExpenses);
       document.getElementById('expenseCountLabel').textContent = `${expenseCount} ${expenseCount === 1 ? 'gasto' : 'gastos'}`;
 
-      // Médias e KM
       document.getElementById('avgProfitPerRoute').textContent = formatBRL(avgProfit);
       if (totalKm > 0 && grossRevenue > 0) {
         const perKm = (netProfit / totalKm).toFixed(2).replace('.', ',');
@@ -1535,7 +1616,6 @@
         document.getElementById('totalKmLabel').textContent = `${totalKm} km`;
       }
 
-      // Histórico
       const listEl = document.getElementById('transactionsList');
       const emptyEl = document.getElementById('emptyState');
 
@@ -1554,7 +1634,7 @@
             : '';
 
           return `
-            <div class="flex items-center justify-between gap-3 p-3.5 rounded-2xl bg-white border border-slate-200 hover:border-[#00C850] transition-colors shadow-2xs">
+            <div class="flex items-center justify-between gap-3 p-3.5 rounded-2xl bg-white border border-slate-200 hover:border-[#00C850] transition-colors">
               <div class="flex items-center gap-3 min-w-0">
                 <div class="w-10 h-10 rounded-xl border ${meta.colorClass} flex items-center justify-center shrink-0">
                   <i data-lucide="${meta.icon}" class="w-5 h-5"></i>
@@ -1690,26 +1770,20 @@
       showToast('Planilha CSV baixada!', 'success');
     }
 
-    // Formatações
     function normalizePlate(val) {
       return String(val || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
     }
 
     function formatPlateInput(input) {
       let v = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-      if (v.length > 3) {
-        v = v.slice(0, 3) + '-' + v.slice(3, 7);
-      }
+      if (v.length > 3) v = v.slice(0, 3) + '-' + v.slice(3, 7);
       input.value = v;
     }
 
     function formatPhoneInput(input) {
       let v = input.value.replace(/\D/g, '').slice(0, 11);
-      if (v.length > 6) {
-        v = `(${v.slice(0, 2)}) ${v.slice(2, 7)}-${v.slice(7)}`;
-      } else if (v.length > 2) {
-        v = `(${v.slice(0, 2)}) ${v.slice(2)}`;
-      }
+      if (v.length > 6) v = `(${v.slice(0, 2)}) ${v.slice(2, 7)}-${v.slice(7)}`;
+      else if (v.length > 2) v = `(${v.slice(0, 2)}) ${v.slice(2)}`;
       input.value = v;
     }
 
@@ -1727,10 +1801,7 @@
     }
 
     function formatBRL(value) {
-      return Number(value || 0).toLocaleString('pt-BR', {
-        style: 'currency',
-        currency: 'BRL'
-      });
+      return Number(value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     }
 
     function formatDateBR(dateStr) {
