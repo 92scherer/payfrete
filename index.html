@@ -167,7 +167,7 @@
         <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
           <div>
             <h2 class="text-lg font-black text-slate-900">Acessar minha conta</h2>
-            <p class="text-xs text-slate-500">Seus dados ficam salvos na nuvem pela sua placa</p>
+            <p class="text-xs text-slate-500">Entre com a placa do veículo e sua senha de 4 números</p>
           </div>
 
           <div>
@@ -221,7 +221,7 @@
         <form id="registerForm" onsubmit="handleRegister(event)" class="hidden space-y-3.5">
           <div>
             <h2 class="text-lg font-black text-slate-900">Cadastro do Motorista</h2>
-            <p class="text-xs text-slate-500">Crie sua conta na nuvem para acessar de qualquer aparelho</p>
+            <p class="text-xs text-slate-500">Crie sua conta para controlar seus fretes e gastos</p>
           </div>
 
           <div>
@@ -870,7 +870,7 @@
 
 
   <!-- =====================================================================
-       LÓGICA COMPLETA: NUVEM GOOGLE DRIVE + PIX 30 DIAS + CACHE OFFLINE
+       LÓGICA COMPLETA: NUVEM GOOGLE DRIVE + FALLBACK OFFLINE + PIX 30 DIAS
        ===================================================================== -->
   <script>
     // =========================================================================
@@ -881,11 +881,12 @@
     // =========================================================================
     // 2. CHAVES PIX (ATIVAÇÃO R$ 19,90 E MENSALIDADE R$ 9,90)
     // =========================================================================
-    const PIX_ATIVACAO_KEY = "00020101021226720014BR.-GOV.BCP.PIX0124cristian-scherer@jim.com0222Pagamentocristian-sch520400005303986540519.905802BR5916CRISTIANSCHERER6012SAOLEOPOLDO62290525QRC-CXN0x6k2OsrRI5jSbKj-HFd63045B86";
+    const PIX_ATIVACAO_KEY = "00020126650014BR.GOV.BCB.PIX0122scherer1992@icloud.com0217Ativacao PayFrete520400005303986540519.905802BR5916CRISTIAN SCHERER6009SAO PAULO622605222BJnyTCe1r4kIO1yiGn91F63043F9A";
     const PIX_MENSALIDADE_KEY = "00020101021226700014BR.-GOV.BCB.PIX0124cristian-scherer@jim.com0220mensalidadePayFre-te52040000530398654049.905802BR5916CRISTIANSCHERER6012SAOLEOPOLDO62290525QRCC-zaht7HpMVRPhIKDP692s-Y6304B8D2";
 
     const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
     const SESSION_KEY = 'payfrete_cloud_session_v1';
+    const LOCAL_DRIVERS_KEY = 'payfrete_local_drivers_v1';
 
     let currentDriver = null;
     let transactions = [];
@@ -941,6 +942,25 @@
         return;
       }
       showAppScreen();
+    }
+
+    // =========================================================================
+    // REPOSITÓRIO LOCAL DE MOTORISTAS (BACKUP PARA CADASTRO E LOGIN OFFLINE)
+    // =========================================================================
+    function getLocalDriversMap() {
+      try {
+        return JSON.parse(localStorage.getItem(LOCAL_DRIVERS_KEY) || '{}');
+      } catch (e) {
+        return {};
+      }
+    }
+
+    function saveLocalDriverRecord(driverObj) {
+      if (!driverObj || !driverObj.plate) return;
+      const map = getLocalDriversMap();
+      const existing = map[driverObj.plate] || {};
+      map[driverObj.plate] = { ...existing, ...driverObj };
+      localStorage.setItem(LOCAL_DRIVERS_KEY, JSON.stringify(map));
     }
 
     // Chamada HTTP ao Google Apps Script
@@ -1020,7 +1040,7 @@
     }
 
     // =========================================================================
-    // LOGIN, CADASTRO E CONFIRMAÇÃO PIX NA NUVEM
+    // LOGIN, CADASTRO E CONFIRMAÇÃO PIX (NUVEM COM FALLBACK LOCAL AUTOMÁTICO)
     // =========================================================================
     function switchAuthTab(tab) {
       const loginForm = document.getElementById('loginForm');
@@ -1044,6 +1064,8 @@
 
     async function handleRegister(event) {
       event.preventDefault();
+      document.getElementById('authErrorBox').classList.add('hidden');
+
       const name = document.getElementById('regName').value.trim();
       const plate = normalizePlate(document.getElementById('regPlate').value);
       const pin = document.getElementById('regPin').value.trim();
@@ -1056,8 +1078,13 @@
 
       const origHTML = btn.innerHTML;
       btn.disabled = true;
-      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Salvando no Google Drive...</span>`;
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Criando cadastro...</span>`;
       lucide.createIcons();
+
+      const defaultPresets = [
+        { id: 'p1', name: 'Frete Urbano / Local', amount: 120, km: 25 },
+        { id: 'p2', name: 'Diária / Rota Fechada', amount: 280, km: 90 }
+      ];
 
       try {
         const res = await callCloud({ action: 'register', name, plate, phone, pin });
@@ -1069,13 +1096,11 @@
           return;
         }
 
-        currentDriver = res.driver;
+        currentDriver = { ...res.driver, pin, phone, pendingRegistration: false };
         transactions = [];
-        routePresets = [
-          { id: 'p1', name: 'Frete Urbano / Local', amount: 120, km: 25 },
-          { id: 'p2', name: 'Diária / Rota Fechada', amount: 280, km: 90 }
-        ];
+        routePresets = defaultPresets;
 
+        saveLocalDriverRecord(currentDriver);
         localStorage.setItem(SESSION_KEY, JSON.stringify(currentDriver));
         saveLocalCache(plate);
 
@@ -1083,22 +1108,50 @@
         btn.innerHTML = origHTML;
         showPixScreen('activation');
       } catch (err) {
-        showAuthError(err.message || 'Erro de conexão com a nuvem.');
+        // Fallback offline se a conexão com Google Apps Script falhar
+        const localMap = getLocalDriversMap();
+        if (localMap[plate]) {
+          showAuthError('Esta placa já está cadastrada neste aparelho. Use a aba "Já tenho cadastro".');
+          btn.disabled = false;
+          btn.innerHTML = origHTML;
+          lucide.createIcons();
+          return;
+        }
+
+        currentDriver = {
+          name,
+          plate,
+          phone,
+          pin,
+          lastPaidAt: 0,
+          activatedAt: 0,
+          pendingRegistration: true
+        };
+        transactions = [];
+        routePresets = defaultPresets;
+
+        saveLocalDriverRecord(currentDriver);
+        localStorage.setItem(SESSION_KEY, JSON.stringify(currentDriver));
+        saveLocalCache(plate);
+
         btn.disabled = false;
         btn.innerHTML = origHTML;
-        lucide.createIcons();
+        showPixScreen('activation');
+        showToast('Cadastro salvo no aparelho! Sincronizará com a nuvem depois.', 'neutral');
       }
     }
 
     async function handleLogin(event) {
       event.preventDefault();
+      document.getElementById('authErrorBox').classList.add('hidden');
+
       const plate = normalizePlate(document.getElementById('loginPlate').value);
       const pin = document.getElementById('loginPin').value.trim();
       const btn = document.getElementById('loginBtn');
 
       const origHTML = btn.innerHTML;
       btn.disabled = true;
-      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Conectando à Nuvem...</span>`;
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Acessando...</span>`;
       lucide.createIcons();
 
       try {
@@ -1111,11 +1164,12 @@
           return;
         }
 
-        currentDriver = res.driver;
+        currentDriver = { ...res.driver, pin, pendingRegistration: false };
         transactions = res.transactions || [];
         routePresets = res.presets || [];
         pendingQueue = [];
 
+        saveLocalDriverRecord(currentDriver);
         localStorage.setItem(SESSION_KEY, JSON.stringify(currentDriver));
         saveLocalCache(plate);
 
@@ -1123,10 +1177,29 @@
         btn.innerHTML = origHTML;
         evaluateSubscriptionAndRoute();
       } catch (err) {
-        showAuthError(err.message || 'Sem conexão com a nuvem.');
+        // Fallback offline se a conexão com Google Apps Script falhar
+        const localMap = getLocalDriversMap();
+        const localDriver = localMap[plate];
+
         btn.disabled = false;
         btn.innerHTML = origHTML;
         lucide.createIcons();
+
+        if (!localDriver) {
+          showAuthError('Sem conexão com a nuvem no momento e esta placa ainda não foi salva neste aparelho.');
+          return;
+        }
+
+        if (String(localDriver.pin) !== String(pin)) {
+          showAuthError('Senha incorreta para esta placa.');
+          return;
+        }
+
+        currentDriver = localDriver;
+        loadLocalCache(plate);
+        localStorage.setItem(SESSION_KEY, JSON.stringify(currentDriver));
+        evaluateSubscriptionAndRoute();
+        showToast('Conectado no modo offline do aparelho.', 'neutral');
       }
     }
 
@@ -1146,10 +1219,21 @@
       const btn = document.getElementById('confirmPixBtn');
       const origHTML = btn.innerHTML;
       btn.disabled = true;
-      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Liberando na Nuvem...</span>`;
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Liberando Acesso...</span>`;
       lucide.createIcons();
 
       try {
+        if (currentDriver.pendingRegistration) {
+          await callCloud({
+            action: 'register',
+            name: currentDriver.name,
+            plate: currentDriver.plate,
+            phone: currentDriver.phone || '',
+            pin: currentDriver.pin || '0000'
+          });
+          currentDriver.pendingRegistration = false;
+        }
+
         const res = await callCloud({
           action: 'confirmPayment',
           plate: currentDriver.plate,
@@ -1159,20 +1243,28 @@
         if (res.ok) {
           currentDriver.lastPaidAt = res.lastPaidAt;
           currentDriver.activatedAt = res.activatedAt;
+          currentDriver.pendingPaymentSync = null;
           transactions = res.transactions || transactions;
           routePresets = res.presets || routePresets;
+          saveLocalDriverRecord(currentDriver);
           localStorage.setItem(SESSION_KEY, JSON.stringify(currentDriver));
           saveLocalCache(currentDriver.plate);
           showAppScreen();
           showToast('Acesso liberado por 30 dias na nuvem!', 'success');
         } else {
-          showToast(res.error || 'Erro ao confirmar.', 'error');
+          throw new Error(res.error || 'Erro ao confirmar.');
         }
       } catch (e) {
-        currentDriver.lastPaidAt = Date.now();
+        const now = Date.now();
+        currentDriver.lastPaidAt = now;
+        if (!currentDriver.activatedAt) currentDriver.activatedAt = now;
+        currentDriver.pendingPaymentSync = currentPixMode;
+
+        saveLocalDriverRecord(currentDriver);
         localStorage.setItem(SESSION_KEY, JSON.stringify(currentDriver));
+        saveLocalCache(currentDriver.plate);
         showAppScreen();
-        showToast('Acesso liberado!', 'success');
+        showToast('Acesso liberado por 30 dias no aparelho!', 'success');
       } finally {
         btn.disabled = false;
         btn.innerHTML = origHTML;
@@ -1227,6 +1319,30 @@
       setSyncStatus('syncing', 'Sincronizando');
 
       try {
+        if (currentDriver.pendingRegistration) {
+          await callCloud({
+            action: 'register',
+            name: currentDriver.name,
+            plate: currentDriver.plate,
+            phone: currentDriver.phone || '',
+            pin: currentDriver.pin || '0000'
+          });
+          currentDriver.pendingRegistration = false;
+          saveLocalDriverRecord(currentDriver);
+          localStorage.setItem(SESSION_KEY, JSON.stringify(currentDriver));
+        }
+
+        if (currentDriver.pendingPaymentSync) {
+          await callCloud({
+            action: 'confirmPayment',
+            plate: currentDriver.plate,
+            mode: currentDriver.pendingPaymentSync
+          });
+          currentDriver.pendingPaymentSync = null;
+          saveLocalDriverRecord(currentDriver);
+          localStorage.setItem(SESSION_KEY, JSON.stringify(currentDriver));
+        }
+
         if (pendingQueue.length > 0) {
           const copy = [...pendingQueue];
           for (const task of copy) {
@@ -1252,6 +1368,7 @@
           routePresets = res.presets || [];
           if (res.lastPaidAt) {
             currentDriver.lastPaidAt = res.lastPaidAt;
+            saveLocalDriverRecord(currentDriver);
             localStorage.setItem(SESSION_KEY, JSON.stringify(currentDriver));
           }
           saveLocalCache(currentDriver.plate);
@@ -1262,7 +1379,7 @@
         }
       } catch (e) {
         setSyncStatus('offline', 'Offline');
-        if (manual) showToast('Sem sinal. Seus dados estão salvos no aparelho.', 'neutral');
+        if (manual) showToast('Sem sinal com a nuvem. Seus dados estão seguros no aparelho.', 'neutral');
       }
     }
 
@@ -1279,7 +1396,7 @@
       } catch (e) {
         pendingQueue.push(payload);
         saveLocalCache(currentDriver.plate);
-        setSyncStatus('offline', 'Fila Nuvem');
+        setSyncStatus('offline', 'Salvo Local');
       }
     }
 
@@ -1417,7 +1534,7 @@
       saveLocalCache(currentDriver.plate);
       closeModal('route');
       renderApp();
-      showToast(`Frete de ${formatBRL(amount)} salvo na nuvem!`, 'success');
+      showToast(`Frete de ${formatBRL(amount)} salvo!`, 'success');
 
       pushCloudTask({
         action: 'addTransaction',
