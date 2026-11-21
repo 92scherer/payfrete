@@ -2004,8 +2004,8 @@
     // =========================================================================
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(() => console.log('PayFrete PWA ativo'))
+        navigator.serviceWorker.register('./sw.js?v=2')
+          .then((reg) => reg.update())
           .catch((err) => console.warn('Erro ao registrar SW:', err));
       });
     }
