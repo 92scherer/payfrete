@@ -882,7 +882,7 @@
     // 2. CHAVES PIX (ATIVAÇÃO R$ 19,90 E MENSALIDADE R$ 9,90)
     // =========================================================================
     const PIX_ATIVACAO_KEY = "00020126650014BR.GOV.BCB.PIX0122scherer1992@icloud.com0217Ativacao PayFrete520400005303986540519.905802BR5916CRISTIAN SCHERER6009SAO PAULO622605222BJnyTCe1r4kIO1yiGn91F63043F9A";
-    const PIX_MENSALIDADE_KEY = "00020101021226700014BR.-GOV.BCB.PIX0124cristian-scherer@jim.com0220mensalidadePayFre-te52040000530398654049.905802BR5916CRISTIANSCHERER6012SAOLEOPOLDO62290525QRCC-zaht7HpMVRPhIKDP692s-Y6304B8D2";
+    const PIX_MENSALIDADE_KEY = "00020126680014BR.GOV.BCB.PIX0122scherer1992@icloud.com0220Mensalidade PayFrete52040000530398654049.905802BR5916CRISTIAN SCHERER6009SAO PAULO622605224tN8hVskbJPfUJBM61iVxV6304CB2A";
 
     const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
     const SESSION_KEY = 'payfrete_cloud_session_v1';
@@ -1108,7 +1108,6 @@
         btn.innerHTML = origHTML;
         showPixScreen('activation');
       } catch (err) {
-        // Fallback offline se a conexão com Google Apps Script falhar
         const localMap = getLocalDriversMap();
         if (localMap[plate]) {
           showAuthError('Esta placa já está cadastrada neste aparelho. Use a aba "Já tenho cadastro".');
@@ -1177,7 +1176,6 @@
         btn.innerHTML = origHTML;
         evaluateSubscriptionAndRoute();
       } catch (err) {
-        // Fallback offline se a conexão com Google Apps Script falhar
         const localMap = getLocalDriversMap();
         const localDriver = localMap[plate];
 
