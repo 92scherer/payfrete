@@ -327,7 +327,7 @@
           Ative seu acesso por R$ 19,90
         </h2>
         <p id="pixSubtitle" class="text-xs text-slate-500 mt-1.5 leading-relaxed">
-          Copie a chave Pix abaixo, faça o pagamento no banco de sua preferência e toque em confirmar para liberar o painel.
+          1º Copie a chave Pix e pague no seu banco. 2º Envie o comprovante no WhatsApp para liberar o sistema na hora.
         </p>
 
         <div class="my-5 p-4 rounded-2xl bg-slate-50 border border-slate-200">
@@ -342,7 +342,7 @@
 
         <div class="text-left mb-4">
           <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">
-            Chave Pix (Copia e Cola)
+            1. Chave Pix (Copia e Cola)
           </label>
           <textarea
             id="pixKeyBox"
@@ -364,14 +364,18 @@
         <button
           type="button"
           id="confirmPixBtn"
-          onclick="confirmPixActivation()"
+          onclick="sendReceiptAndActivate()"
           class="w-full py-4 px-4 rounded-2xl bg-[#00E65B] hover:bg-[#00D453] active:scale-[0.98] text-slate-950 font-black text-sm neon-glow transition-all flex items-center justify-center gap-2"
         >
-          <i data-lucide="check-circle-2" class="w-5 h-5 stroke-[2.5]"></i>
-          <span>Já fiz o Pix, Liberar Acesso</span>
+          <i data-lucide="send" class="w-5 h-5 stroke-[2.5]"></i>
+          <span>Enviar Comprovante no WhatsApp e Liberar</span>
         </button>
 
-        <div class="mt-5 p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-left flex items-start gap-2.5">
+        <p class="text-[11px] text-slate-500 font-medium mt-2.5">
+          Ao tocar acima, seu WhatsApp abrirá para anexar o comprovante e o painel será liberado automaticamente.
+        </p>
+
+        <div class="mt-4 p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-left flex items-start gap-2.5">
           <i data-lucide="calendar-clock" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
           <p class="text-[11px] text-amber-900 leading-relaxed">
             <strong>Aviso importante:</strong> Após 30 dias de uso, será solicitada a renovação da mensalidade no valor de <strong>R$ 9,90 via Pix</strong> diretamente na tela do aplicativo.
@@ -870,7 +874,7 @@
 
 
   <!-- =====================================================================
-       LÓGICA COMPLETA: NUVEM GOOGLE DRIVE + FALLBACK OFFLINE + PIX 30 DIAS
+       LÓGICA COMPLETA: NUVEM GOOGLE DRIVE + FALLBACK OFFLINE + WHATSAPP PIX
        ===================================================================== -->
   <script>
     // =========================================================================
@@ -879,7 +883,12 @@
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyUsrai0uYgPn12C8TymofeLhwz6QC_SYc2IhnliHqz6gssi2cir1BM_7NZyzmshr3J/exec";
 
     // =========================================================================
-    // 2. CHAVES PIX (ATIVAÇÃO R$ 19,90 E MENSALIDADE R$ 9,90)
+    // 2. WHATSAPP DO ADMINISTRADOR (RECEBIMENTO DE COMPROVANTES)
+    // =========================================================================
+    const ADMIN_WHATSAPP = "5551992743197";
+
+    // =========================================================================
+    // 3. CHAVES PIX (ATIVAÇÃO R$ 19,90 E MENSALIDADE R$ 9,90)
     // =========================================================================
     const PIX_ATIVACAO_KEY = "00020126650014BR.GOV.BCB.PIX0122scherer1992@icloud.com0217Ativacao PayFrete520400005303986540519.905802BR5916CRISTIAN SCHERER6009SAO PAULO622605222BJnyTCe1r4kIO1yiGn91F63043F9A";
     const PIX_MENSALIDADE_KEY = "00020126680014BR.GOV.BCB.PIX0122scherer1992@icloud.com0220Mensalidade PayFrete52040000530398654049.905802BR5916CRISTIAN SCHERER6009SAO PAULO622605224tN8hVskbJPfUJBM61iVxV6304CB2A";
@@ -1007,13 +1016,13 @@
       if (mode === 'activation') {
         badge.textContent = 'Ativação Inicial';
         title.textContent = 'Ativação PayFrete - R$ 19,90';
-        subtitle.textContent = 'Pague a taxa única de ativação via Pix para liberar seu controle financeiro por 30 dias.';
+        subtitle.textContent = '1º Copie a chave Pix e pague no seu banco. 2º Envie o comprovante no WhatsApp para liberar o sistema na hora.';
         amount.textContent = 'R$ 19,90';
         keyBox.value = PIX_ATIVACAO_KEY;
       } else {
         badge.textContent = 'Renovação Mensal (30 dias)';
         title.textContent = 'Mensalidade R$ 9,90 via Pix';
-        subtitle.textContent = 'Seu período de 30 dias venceu. Faça o Pix de R$ 9,90 para renovar por mais 30 dias.';
+        subtitle.textContent = 'Seu período de 30 dias venceu. Faça o Pix de R$ 9,90 e envie o comprovante no WhatsApp para renovar.';
         amount.textContent = 'R$ 9,90';
         keyBox.value = PIX_MENSALIDADE_KEY;
       }
@@ -1040,7 +1049,7 @@
     }
 
     // =========================================================================
-    // LOGIN, CADASTRO E CONFIRMAÇÃO PIX (NUVEM COM FALLBACK LOCAL AUTOMÁTICO)
+    // LOGIN, CADASTRO E ENVIO DE COMPROVANTE WHATSAPP + LIBERAÇÃO AUTOMÁTICA
     // =========================================================================
     function switchAuthTab(tab) {
       const loginForm = document.getElementById('loginForm');
@@ -1213,13 +1222,31 @@
       });
     }
 
-    async function confirmPixActivation() {
+    async function sendReceiptAndActivate() {
       const btn = document.getElementById('confirmPixBtn');
       const origHTML = btn.innerHTML;
       btn.disabled = true;
-      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Liberando Acesso...</span>`;
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Abrindo WhatsApp e Liberando...</span>`;
       lucide.createIcons();
 
+      // Monta a mensagem pronta com os dados da placa para o WhatsApp 51992743197
+      const tipoPagamento = currentPixMode === 'activation'
+        ? 'Ativação PayFrete (R$ 19,90)'
+        : 'Renovação Mensal PayFrete (R$ 9,90)';
+
+      const msgWhatsApp =
+        `Olá! Segue meu comprovante Pix do *PayFrete* 🚚✅\n\n` +
+        `👤 *Motorista:* ${currentDriver.name}\n` +
+        `🚘 *Placa:* ${currentDriver.plate}\n` +
+        `💳 *Plano:* ${tipoPagamento}\n\n` +
+        `_(Anexando o comprovante abaixo)_`;
+
+      const whatsappUrl = `https://wa.me/${ADMIN_WHATSAPP}?text=${encodeURIComponent(msgWhatsApp)}`;
+
+      // Abre o WhatsApp imediatamente no clique do usuário (evita bloqueio de pop-up)
+      window.open(whatsappUrl, '_blank');
+
+      // Libera o sistema automaticamente na nuvem e localmente
       try {
         if (currentDriver.pendingRegistration) {
           await callCloud({
@@ -1248,7 +1275,7 @@
           localStorage.setItem(SESSION_KEY, JSON.stringify(currentDriver));
           saveLocalCache(currentDriver.plate);
           showAppScreen();
-          showToast('Acesso liberado por 30 dias na nuvem!', 'success');
+          showToast('Comprovante enviado e acesso liberado por 30 dias!', 'success');
         } else {
           throw new Error(res.error || 'Erro ao confirmar.');
         }
@@ -1262,7 +1289,7 @@
         localStorage.setItem(SESSION_KEY, JSON.stringify(currentDriver));
         saveLocalCache(currentDriver.plate);
         showAppScreen();
-        showToast('Acesso liberado por 30 dias no aparelho!', 'success');
+        showToast('Comprovante enviado e acesso liberado por 30 dias!', 'success');
       } finally {
         btn.disabled = false;
         btn.innerHTML = origHTML;
