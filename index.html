@@ -120,12 +120,13 @@
     <div>
       <header class="flex flex-col items-center justify-center text-center mt-1 mb-5">
         <img
+          id="authLogoTrigger"
           src="logo.png"
           alt="PayFrete Logo"
-          class="h-56 sm:h-64 w-auto max-w-[90vw] object-contain mx-auto"
+          class="h-56 sm:h-64 w-auto max-w-[90vw] object-contain mx-auto cursor-pointer select-none"
           onerror="this.style.display='none'; document.getElementById('authLogoFallback').classList.remove('hidden');"
         />
-        <div id="authLogoFallback" class="hidden flex items-center gap-4 px-7 py-5 rounded-3xl bg-slate-50 border border-slate-200">
+        <div id="authLogoFallback" class="hidden flex items-center gap-4 px-7 py-5 rounded-3xl bg-slate-50 border border-slate-200 cursor-pointer select-none">
           <div class="w-16 h-16 rounded-2xl bg-[#00E65B] flex items-center justify-center text-slate-950">
             <i data-lucide="truck" class="w-9 h-9 stroke-[2.5]"></i>
           </div>
@@ -171,8 +172,8 @@
           <span id="authErrorText">Verifique os dados informados.</span>
         </div>
 
-        <!-- FORMULÁRIO 1: LOGIN -->
-        <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+        <!-- FORMULÁRIO 1: LOGIN (COM PROTEÇÃO CONTRA AUTOCOMPLETE DO NOME) -->
+        <form id="loginForm" autocomplete="off" onsubmit="handleLogin(event)" class="space-y-4">
           <div>
             <h2 class="text-lg font-black text-slate-900">Acessar minha conta</h2>
             <p class="text-xs text-slate-500">Entre com a placa do veículo e sua senha de 4 números</p>
@@ -187,8 +188,13 @@
               <input
                 type="text"
                 id="loginPlate"
+                name="veiculo_placa_login"
                 maxlength="8"
                 required
+                autocomplete="off"
+                autocorrect="off"
+                autocapitalize="characters"
+                spellcheck="false"
                 oninput="formatPlateInput(this)"
                 placeholder="ABC-1D23"
                 class="w-full bg-slate-50 border border-slate-200 focus:border-[#00C850] focus:bg-white rounded-2xl pl-10 pr-4 py-3.5 text-base font-black uppercase tracking-wider text-slate-900 placeholder-slate-400 outline-none"
@@ -205,10 +211,12 @@
               <input
                 type="password"
                 id="loginPin"
+                name="senha_atual_pin"
                 maxlength="4"
                 pattern="\d{4}"
                 inputmode="numeric"
                 required
+                autocomplete="current-password"
                 placeholder="••••"
                 class="w-full bg-slate-50 border border-slate-200 focus:border-[#00C850] focus:bg-white rounded-2xl pl-10 pr-4 py-3.5 text-lg font-black tracking-[0.35em] text-slate-900 placeholder-slate-400 outline-none tabular-nums"
               />
@@ -226,7 +234,7 @@
         </form>
 
         <!-- FORMULÁRIO 2: PRIMEIRO CADASTRO -->
-        <form id="registerForm" onsubmit="handleRegister(event)" class="hidden space-y-3.5">
+        <form id="registerForm" autocomplete="off" onsubmit="handleRegister(event)" class="hidden space-y-3.5">
           <div>
             <h2 class="text-lg font-black text-slate-900">Cadastro do Motorista</h2>
             <p class="text-xs text-slate-500">Crie sua conta para controlar seus fretes e gastos</p>
@@ -237,6 +245,8 @@
             <input
               type="text"
               id="regName"
+              name="motorista_nome_completo"
+              autocomplete="name"
               required
               placeholder="Ex: João da Silva"
               class="w-full bg-slate-50 border border-slate-200 focus:border-[#00C850] focus:bg-white rounded-2xl px-4 py-3 text-sm font-semibold text-slate-900 placeholder-slate-400 outline-none"
@@ -249,8 +259,13 @@
               <input
                 type="text"
                 id="regPlate"
+                name="veiculo_placa_cadastro"
                 maxlength="8"
                 required
+                autocomplete="off"
+                autocorrect="off"
+                autocapitalize="characters"
+                spellcheck="false"
                 oninput="formatPlateInput(this)"
                 placeholder="ABC-1D23"
                 class="w-full bg-slate-50 border border-slate-200 focus:border-[#00C850] focus:bg-white rounded-2xl px-3.5 py-3 text-sm font-black uppercase tracking-wider text-slate-900 placeholder-slate-400 outline-none"
@@ -262,10 +277,12 @@
               <input
                 type="password"
                 id="regPin"
+                name="nova_senha_pin"
                 maxlength="4"
                 pattern="\d{4}"
                 inputmode="numeric"
                 required
+                autocomplete="new-password"
                 placeholder="Ex: 1234"
                 class="w-full bg-slate-50 border border-slate-200 focus:border-[#00C850] focus:bg-white rounded-2xl px-3.5 py-3 text-sm font-black tracking-[0.25em] text-slate-900 placeholder-slate-400 outline-none tabular-nums"
               />
@@ -277,7 +294,9 @@
             <input
               type="tel"
               id="regPhone"
+              name="motorista_telefone"
               inputmode="numeric"
+              autocomplete="tel"
               required
               oninput="formatPhoneInput(this)"
               placeholder="(51) 99999-9999"
@@ -315,7 +334,7 @@
       </div>
 
       <p class="text-[11px] text-slate-400 font-medium">
-        PayFrete &bull; O amigo do freteiro
+        <span onclick="openAdminPinModal()" class="cursor-pointer hover:text-slate-600">PayFrete</span> &bull; O amigo do freteiro
       </p>
     </footer>
   </div>
@@ -663,6 +682,87 @@
 
 
   <!-- =====================================================================
+       TELA 4: PAINEL ADMINISTRATIVO (GESTÃO DE MOTORISTAS E LIBERAÇÕES)
+       ===================================================================== -->
+  <div id="adminScreen" class="hidden w-full max-w-2xl mx-auto px-4 sm:px-6 py-6 min-h-screen flex-col justify-between bg-white">
+    <div>
+      <header class="flex items-center justify-between gap-3 pb-4 mb-5 border-b border-slate-200">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-xl bg-slate-900 text-[#00E65B] flex items-center justify-center">
+            <i data-lucide="shield-check" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h2 class="text-base font-black text-slate-900">Painel Admin PayFrete</h2>
+            <p class="text-[11px] text-slate-500">Gestão de placas, liberações e bloqueios</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            onclick="loadAdminDrivers(true)"
+            class="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200"
+            title="Atualizar lista"
+          >
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+          </button>
+          <button
+            type="button"
+            onclick="exitAdminPanel()"
+            class="px-3.5 py-2 rounded-xl bg-slate-900 text-white text-xs font-extrabold hover:bg-slate-800"
+          >
+            Sair
+          </button>
+        </div>
+      </header>
+
+      <!-- ESTATÍSTICAS -->
+      <div class="grid grid-cols-4 gap-2 mb-5">
+        <div class="rounded-2xl bg-slate-50 border border-slate-200 p-3 text-center">
+          <span id="adminStatTotal" class="block text-xl font-black text-slate-900 tabular-nums">0</span>
+          <span class="text-[10px] font-bold uppercase text-slate-500">Total</span>
+        </div>
+        <div class="rounded-2xl bg-[#E8FFF0] border border-[#00E65B]/50 p-3 text-center">
+          <span id="adminStatActive" class="block text-xl font-black text-[#009E3E] tabular-nums">0</span>
+          <span class="text-[10px] font-bold uppercase text-[#008A36]">Ativos</span>
+        </div>
+        <div class="rounded-2xl bg-amber-50 border border-amber-200 p-3 text-center">
+          <span id="adminStatPending" class="block text-xl font-black text-amber-600 tabular-nums">0</span>
+          <span class="text-[10px] font-bold uppercase text-amber-700">Pendentes</span>
+        </div>
+        <div class="rounded-2xl bg-red-50 border border-red-200 p-3 text-center">
+          <span id="adminStatBlocked" class="block text-xl font-black text-red-600 tabular-nums">0</span>
+          <span class="text-[10px] font-bold uppercase text-red-700">Bloqueados</span>
+        </div>
+      </div>
+
+      <!-- CAMPO DE BUSCA -->
+      <div class="relative mb-4">
+        <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+          <i data-lucide="search" class="w-4 h-4"></i>
+        </span>
+        <input
+          type="text"
+          id="adminSearchInput"
+          autocomplete="off"
+          oninput="renderAdminDriversList()"
+          placeholder="Buscar por nome, placa ou telefone..."
+          class="w-full bg-slate-50 border border-slate-200 focus:border-[#00C850] focus:bg-white rounded-2xl pl-10 pr-4 py-3 text-sm font-semibold text-slate-900 placeholder-slate-400 outline-none"
+        />
+      </div>
+
+      <!-- LISTA DE MOTORISTAS -->
+      <div id="adminDriversList" class="space-y-3"></div>
+    </div>
+
+    <footer class="mt-8 pt-4 border-t border-slate-100 text-center">
+      <p class="text-[11px] text-slate-400 font-medium">
+        Administração PayFrete &bull; Sincronizado com Google Drive
+      </p>
+    </footer>
+  </div>
+
+
+  <!-- =====================================================================
        MODAL 1: + NOVO FRETE
        ===================================================================== -->
   <div id="routeModal" class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center bg-slate-900/60 backdrop-blur-sm p-0 sm:p-4 overflow-y-auto">
@@ -886,6 +986,38 @@
   </div>
 
 
+  <!-- =====================================================================
+       MODAL 4: LOGIN ADMINISTRATIVO (SENHA MESTRA)
+       ===================================================================== -->
+  <div id="adminPinModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+    <div class="w-full max-w-xs bg-white border border-slate-200 rounded-3xl p-6 text-center shadow-2xl">
+      <div class="w-12 h-12 rounded-2xl bg-slate-900 text-[#00E65B] flex items-center justify-center mx-auto mb-3">
+        <i data-lucide="lock" class="w-6 h-6"></i>
+      </div>
+      <h3 class="text-base font-black text-slate-900 mb-1">Acesso Administrativo</h3>
+      <p class="text-xs text-slate-500 mb-4">Digite a senha mestra para gerenciar motoristas</p>
+      <input
+        type="password"
+        id="adminMasterPinInput"
+        maxlength="6"
+        inputmode="numeric"
+        autocomplete="off"
+        placeholder="••••"
+        onkeypress="if(event.key==='Enter') verifyAdminMasterPin()"
+        class="w-full bg-slate-50 border border-slate-200 focus:border-[#00C850] rounded-2xl px-4 py-3 text-center text-xl font-black tracking-[0.35em] text-slate-900 outline-none mb-4 tabular-nums"
+      />
+      <div class="grid grid-cols-2 gap-2.5">
+        <button type="button" onclick="closeAdminPinModal()" class="py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700">
+          Cancelar
+        </button>
+        <button type="button" onclick="verifyAdminMasterPin()" class="py-3 rounded-xl bg-[#00E65B] hover:bg-[#00D453] text-xs font-black text-slate-950">
+          Entrar
+        </button>
+      </div>
+    </div>
+  </div>
+
+
   <!-- TOAST DE FEEDBACK -->
   <div id="toastNotification" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 hidden items-center gap-2 px-4 py-2.5 rounded-2xl bg-slate-900 text-xs font-bold text-white shadow-2xl whitespace-nowrap">
     <span id="toastDot" class="w-2 h-2 rounded-full bg-[#00E65B]"></span>
@@ -894,11 +1026,12 @@
 
 
   <!-- =====================================================================
-       LÓGICA COMPLETA: PWA + NUVEM GOOGLE DRIVE + OFFLINE + WHATSAPP PIX
+       LÓGICA COMPLETA: PWA + NUVEM GOOGLE DRIVE + OFFLINE + WHATSAPP PIX + ADMIN
        ===================================================================== -->
   <script>
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby7snlAf-VJAc9M3fgnXQhqP2ezTUOKP4t5NMWKhAWjpmSeuGh7-gALYpOWjKUxnhNR/exec";
     const ADMIN_WHATSAPP = "5551992743197";
+    const ADMIN_MASTER_PIN = "1992";
 
     const PIX_ATIVACAO_KEY = "00020126650014BR.GOV.BCB.PIX0122scherer1992@icloud.com0217Ativacao PayFrete520400005303986540519.905802BR5916CRISTIAN SCHERER6009SAO PAULO622605222BJnyTCe1r4kIO1yiGn91F63043F9A";
     const PIX_MENSALIDADE_KEY = "00020126680014BR.GOV.BCB.PIX0122scherer1992@icloud.com0220Mensalidade PayFrete52040000530398654049.905802BR5916CRISTIAN SCHERER6009SAO PAULO622605224tN8hVskbJPfUJBM61iVxV6304CB2A";
@@ -906,6 +1039,7 @@
     const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
     const SESSION_KEY = 'payfrete_cloud_session_v1';
     const LOCAL_DRIVERS_KEY = 'payfrete_local_drivers_v1';
+    const LAST_PLATE_KEY = 'payfrete_last_valid_plate_v1';
 
     let currentDriver = null;
     let transactions = [];
@@ -914,9 +1048,13 @@
     let currentFilter = 'daily';
     let currentPixMode = 'activation';
     let itemToDeleteId = null;
+    let adminDriversList = [];
+    let logoClickCount = 0;
 
     document.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
+      setupAdminLogoTrigger();
+      sanitizeLoginPlateField();
 
       requestAnimationFrame(() => {
         const bar = document.getElementById('splashProgress');
@@ -928,10 +1066,51 @@
         splash.classList.add('opacity-0');
         setTimeout(() => {
           splash.classList.add('hidden');
-          checkExistingSession();
+          if (window.location.search.includes('admin=true') || window.location.hash === '#admin') {
+            showAuthScreen();
+            openAdminPinModal();
+          } else {
+            checkExistingSession();
+          }
         }, 250);
       }, 2000);
     });
+
+    // Impede que o navegador injete o Nome no campo de Placa e restaura a última placa válida
+    function sanitizeLoginPlateField() {
+      const loginPlateEl = document.getElementById('loginPlate');
+      if (!loginPlateEl) return;
+
+      const savedPlate = localStorage.getItem(LAST_PLATE_KEY) || '';
+
+      const fixField = () => {
+        const val = loginPlateEl.value.trim();
+        // Se contiver espaço ou não bater com padrão de placa (3 letras + números), o navegador preencheu o Nome
+        if (val && (val.includes(' ') || !/^[A-Za-z]{3}-?[A-Za-z0-9]{0,4}$/.test(val))) {
+          loginPlateEl.value = savedPlate;
+        } else if (!val && savedPlate) {
+          loginPlateEl.value = savedPlate;
+        }
+      };
+
+      setTimeout(fixField, 100);
+      setTimeout(fixField, 500);
+    }
+
+    function setupAdminLogoTrigger() {
+      ['authLogoTrigger', 'authLogoFallback'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('click', () => {
+          logoClickCount++;
+          if (logoClickCount >= 3) {
+            logoClickCount = 0;
+            openAdminPinModal();
+          }
+          setTimeout(() => { logoClickCount = 0; }, 1500);
+        });
+      });
+    }
 
     function checkExistingSession() {
       try {
@@ -996,6 +1175,8 @@
       document.getElementById('authScreen').classList.add('flex');
       document.getElementById('pixScreen').classList.add('hidden');
       document.getElementById('appScreen').classList.add('hidden');
+      document.getElementById('adminScreen').classList.add('hidden');
+      sanitizeLoginPlateField();
       lucide.createIcons();
     }
 
@@ -1003,6 +1184,7 @@
       currentPixMode = mode;
       document.getElementById('authScreen').classList.add('hidden');
       document.getElementById('appScreen').classList.add('hidden');
+      document.getElementById('adminScreen').classList.add('hidden');
       document.getElementById('pixScreen').classList.remove('hidden');
       document.getElementById('pixScreen').classList.add('flex');
 
@@ -1035,6 +1217,7 @@
     function showAppScreen() {
       document.getElementById('authScreen').classList.add('hidden');
       document.getElementById('pixScreen').classList.add('hidden');
+      document.getElementById('adminScreen').classList.add('hidden');
       document.getElementById('appScreen').classList.remove('hidden');
       document.getElementById('appScreen').classList.add('flex');
 
@@ -1062,6 +1245,7 @@
         registerForm.classList.add('hidden');
         tabLoginBtn.className = 'py-2.5 rounded-xl text-xs font-extrabold transition-all bg-white text-slate-900 shadow-sm border border-slate-200/60';
         tabRegisterBtn.className = 'py-2.5 rounded-xl text-xs font-bold transition-all text-slate-500 hover:text-slate-900';
+        sanitizeLoginPlateField();
       } else {
         loginForm.classList.add('hidden');
         registerForm.classList.remove('hidden');
@@ -1075,7 +1259,8 @@
       document.getElementById('authErrorBox').classList.add('hidden');
 
       const name = document.getElementById('regName').value.trim();
-      const plate = normalizePlate(document.getElementById('regPlate').value);
+      const plateFormatted = document.getElementById('regPlate').value.trim().toUpperCase();
+      const plate = normalizePlate(plateFormatted);
       const pin = document.getElementById('regPin').value.trim();
       const phone = document.getElementById('regPhone').value.replace(/\D/g, '');
       const btn = document.getElementById('registerBtn');
@@ -1083,6 +1268,8 @@
       if (plate.length < 7) return showAuthError('Digite uma placa válida (ex: ABC-1D23).');
       if (!/^\d{4}$/.test(pin)) return showAuthError('A senha deve ter exatamente 4 números.');
       if (phone.length < 10) return showAuthError('Digite o telefone completo com DDD.');
+
+      localStorage.setItem(LAST_PLATE_KEY, plateFormatted);
 
       const origHTML = btn.innerHTML;
       btn.disabled = true;
@@ -1152,9 +1339,16 @@
       event.preventDefault();
       document.getElementById('authErrorBox').classList.add('hidden');
 
-      const plate = normalizePlate(document.getElementById('loginPlate').value);
+      const plateFormatted = document.getElementById('loginPlate').value.trim().toUpperCase();
+      const plate = normalizePlate(plateFormatted);
       const pin = document.getElementById('loginPin').value.trim();
       const btn = document.getElementById('loginBtn');
+
+      if (plate.length < 7) {
+        return showAuthError('Digite uma placa válida no campo Placa do Veículo.');
+      }
+
+      localStorage.setItem(LAST_PLATE_KEY, plateFormatted);
 
       const origHTML = btn.innerHTML;
       btn.disabled = true;
@@ -1206,6 +1400,191 @@
         localStorage.setItem(SESSION_KEY, JSON.stringify(currentDriver));
         evaluateSubscriptionAndRoute();
         showToast('Conectado no modo offline do aparelho.', 'neutral');
+      }
+    }
+
+    // =========================================================================
+    // PAINEL ADMINISTRATIVO
+    // =========================================================================
+    function openAdminPinModal() {
+      const modal = document.getElementById('adminPinModal');
+      const input = document.getElementById('adminMasterPinInput');
+      input.value = '';
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      setTimeout(() => input.focus(), 100);
+      lucide.createIcons();
+    }
+
+    function closeAdminPinModal() {
+      const modal = document.getElementById('adminPinModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function verifyAdminMasterPin() {
+      const pin = document.getElementById('adminMasterPinInput').value.trim();
+      if (pin === ADMIN_MASTER_PIN) {
+        closeAdminPinModal();
+        document.getElementById('authScreen').classList.add('hidden');
+        document.getElementById('pixScreen').classList.add('hidden');
+        document.getElementById('appScreen').classList.add('hidden');
+        document.getElementById('adminScreen').classList.remove('hidden');
+        document.getElementById('adminScreen').classList.add('flex');
+        loadAdminDrivers(false);
+        lucide.createIcons();
+      } else {
+        showToast('Senha mestra incorreta!', 'error');
+      }
+    }
+
+    function exitAdminPanel() {
+      document.getElementById('adminScreen').classList.add('hidden');
+      showAuthScreen();
+    }
+
+    async function loadAdminDrivers(manual = false) {
+      try {
+        const res = await callCloud({ action: 'adminList', pin: ADMIN_MASTER_PIN });
+        if (res && res.ok && Array.isArray(res.drivers)) {
+          adminDriversList = res.drivers;
+          if (manual) showToast('Lista atualizada da nuvem!', 'success');
+        } else {
+          throw new Error();
+        }
+      } catch (e) {
+        const localMap = getLocalDriversMap();
+        adminDriversList = Object.values(localMap);
+        if (manual) showToast('Exibindo cadastros locais do aparelho.', 'neutral');
+      }
+      renderAdminDriversList();
+    }
+
+    function renderAdminDriversList() {
+      const search = (document.getElementById('adminSearchInput')?.value || '').toLowerCase();
+      const now = Date.now();
+
+      let total = adminDriversList.length;
+      let activeCount = 0;
+      let pendingCount = 0;
+      let blockedCount = 0;
+
+      adminDriversList.forEach(d => {
+        if (d.blocked) blockedCount++;
+        else if (d.lastPaidAt && (now - Number(d.lastPaidAt)) < THIRTY_DAYS_MS) activeCount++;
+        else pendingCount++;
+      });
+
+      document.getElementById('adminStatTotal').textContent = total;
+      document.getElementById('adminStatActive').textContent = activeCount;
+      document.getElementById('adminStatPending').textContent = pendingCount;
+      document.getElementById('adminStatBlocked').textContent = blockedCount;
+
+      const filtered = adminDriversList.filter(d =>
+        String(d.name || '').toLowerCase().includes(search) ||
+        String(d.plate || '').toLowerCase().includes(search) ||
+        String(d.phone || '').includes(search)
+      );
+
+      const container = document.getElementById('adminDriversList');
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="p-6 text-center rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-500">Nenhum motorista encontrado.</div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(d => {
+        const isBlocked = Boolean(d.blocked);
+        const isActive = !isBlocked && d.lastPaidAt && (now - Number(d.lastPaidAt)) < THIRTY_DAYS_MS;
+
+        let badgeHTML = `<span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-extrabold">PENDENTE</span>`;
+        if (isBlocked) badgeHTML = `<span class="px-2.5 py-0.5 rounded-full bg-red-100 text-red-700 text-[10px] font-extrabold">BLOQUEADO</span>`;
+        else if (isActive) {
+          const daysLeft = Math.max(1, Math.ceil((THIRTY_DAYS_MS - (now - Number(d.lastPaidAt))) / (24 * 60 * 60 * 1000)));
+          badgeHTML = `<span class="px-2.5 py-0.5 rounded-full bg-[#E8FFF0] text-[#008A36] text-[10px] font-extrabold">ATIVO (${daysLeft}d)</span>`;
+        }
+
+        const cleanPhone = String(d.phone || '').replace(/\D/g, '');
+        const waLink = cleanPhone
+          ? `https://wa.me/55${cleanPhone}?text=${encodeURIComponent(`Olá ${d.name}, sobre seu cadastro da placa ${d.plate} no PayFrete:`)}`
+          : '#';
+
+        return `
+          <div class="rounded-2xl bg-white border border-slate-200 p-4 shadow-sm">
+            <div class="flex items-center justify-between gap-2 mb-1">
+              <span class="text-sm font-black text-slate-900 tracking-wider uppercase">${escapeHTML(d.plate)}</span>
+              ${badgeHTML}
+            </div>
+            <p class="text-xs font-bold text-slate-700">${escapeHTML(d.name)}</p>
+            <p class="text-[11px] text-slate-400 mb-3">Tel: ${escapeHTML(d.phone || 'Não informado')}</p>
+            <div class="grid grid-cols-3 gap-2">
+              <button
+                type="button"
+                onclick="adminUpdateDriver('${escapeHTML(d.plate)}', 'activate30')"
+                class="py-2 px-2 rounded-xl bg-[#00E65B] hover:bg-[#00D453] text-slate-950 text-[11px] font-black transition-all"
+              >
+                Liberar 30d
+              </button>
+              <button
+                type="button"
+                onclick="adminUpdateDriver('${escapeHTML(d.plate)}', '${isBlocked ? 'unblock' : 'block'}')"
+                class="py-2 px-2 rounded-xl ${isBlocked ? 'bg-slate-800 text-white' : 'bg-red-50 text-red-600 border border-red-200'} text-[11px] font-extrabold transition-all"
+              >
+                ${isBlocked ? 'Desbloquear' : 'Bloquear'}
+              </button>
+              <a
+                href="${waLink}"
+                target="_blank"
+                class="py-2 px-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-extrabold text-center transition-all"
+              >
+                WhatsApp
+              </a>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    async function adminUpdateDriver(plate, actionType) {
+      const now = Date.now();
+      const localMap = getLocalDriversMap();
+
+      if (localMap[plate]) {
+        if (actionType === 'activate30') {
+          localMap[plate].lastPaidAt = now;
+          localMap[plate].blocked = false;
+        } else if (actionType === 'block') {
+          localMap[plate].blocked = true;
+        } else if (actionType === 'unblock') {
+          localMap[plate].blocked = false;
+        }
+        localStorage.setItem(LOCAL_DRIVERS_KEY, JSON.stringify(localMap));
+      }
+
+      const idx = adminDriversList.findIndex(d => d.plate === plate);
+      if (idx > -1) {
+        if (actionType === 'activate30') {
+          adminDriversList[idx].lastPaidAt = now;
+          adminDriversList[idx].blocked = false;
+        } else if (actionType === 'block') {
+          adminDriversList[idx].blocked = true;
+        } else if (actionType === 'unblock') {
+          adminDriversList[idx].blocked = false;
+        }
+        renderAdminDriversList();
+      }
+
+      try {
+        await callCloud({
+          action: 'adminUpdate',
+          pin: ADMIN_MASTER_PIN,
+          plate,
+          operation: actionType
+        });
+        showToast('Status atualizado na nuvem!', 'success');
+      } catch (e) {
+        showToast('Atualizado localmente.', 'neutral');
       }
     }
 
@@ -1298,6 +1677,7 @@
       currentDriver = null;
       transactions = [];
       routePresets = [];
+      document.getElementById('loginPin').value = '';
       showAuthScreen();
     }
 
