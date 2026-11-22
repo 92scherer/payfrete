@@ -1085,7 +1085,6 @@
 
       const fixField = () => {
         const val = loginPlateEl.value.trim();
-        // Se contiver espaço ou não bater com padrão de placa (3 letras + números), o navegador preencheu o Nome
         if (val && (val.includes(' ') || !/^[A-Za-z]{3}-?[A-Za-z0-9]{0,4}$/.test(val))) {
           loginPlateEl.value = savedPlate;
         } else if (!val && savedPlate) {
